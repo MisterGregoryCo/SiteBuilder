@@ -8,7 +8,7 @@ export async function resolveSite(slug: string): Promise<Site | null> {
     .from('sites')
     .select('*')
     .eq('slug', slug)
-    .eq('status', 'published')
+    .in('status', ['published', 'draft'])
     .single();
 
   if (error || !data) {

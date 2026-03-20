@@ -14,10 +14,9 @@ export default function PreviewPage() {
 
   const fetchSite = useCallback(async () => {
     try {
-      const res = await fetch(`/api/sites?id=${params.id}`);
+      const res = await fetch(`/api/sites/${params.id}`);
       const data = await res.json();
-      const found = data.sites?.find((s: Site) => s.id === params.id);
-      if (found) setSite(found);
+      if (data.site) setSite(data.site);
     } catch (error) {
       console.error('Failed to fetch site:', error);
     } finally {
