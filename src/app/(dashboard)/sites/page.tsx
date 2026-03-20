@@ -146,7 +146,11 @@ export default function SitesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredSites.map((site) => (
-              <SiteCard key={site.id} site={site} />
+              <SiteCard
+                key={site.id}
+                site={site}
+                onDelete={(id) => setSites(sites.filter((s) => s.id !== id))}
+              />
             ))}
           </div>
         )}
