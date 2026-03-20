@@ -20,6 +20,7 @@ export default function SitesPage() {
   const [sites, setSites] = useState<SiteListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'all', industry: 'all' });
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetchSites();
@@ -40,6 +41,16 @@ export default function SitesPage() {
   const filteredSites = sites.filter((site) => {
     if (filter.status !== 'all' && site.status !== filter.status) return false;
     if (filter.industry !== 'all' && site.industry !== filter.industry) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const matches =
+        site.business_name.toLowerCase().includes(q) ||
+        site.slug.toLowerCase().includes(q) ||
+        site.business_city.toLowerCase().includes(q) ||
+        (site.business_state || '').toLowerCase().includes(q) ||
+        site.industry.toLowerCase().includes(q);
+      if (!matches) return false;
+    }
     return true;
   });
 
@@ -68,8 +79,31 @@ export default function SitesPage() {
           ))}
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-4 mb-6">
+        {/* Search & Filters */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6">
+          <div className="relative flex-1">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#6B7280' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, city, or slug..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg text-sm text-white outline-none placeholder-gray-600 focus:ring-2"
+              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', '--tw-ring-color': '#E8762D' } as React.CSSProperties}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-white/10"
+              >
+                <svg className="w-3.5 h-3.5" style={{ color: '#6B7280' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           <select
             value={filter.status}
             onChange={(e) => setFilter({ ...filter, status: e.target.value })}
@@ -103,7 +137,7 @@ export default function SitesPage() {
         ) : filteredSites.length === 0 ? (
           <div className="text-center py-20">
             <p className="mb-4" style={{ color: '#9CA3AF' }}>
-              {sites.length === 0 ? 'No sites generated yet.' : 'No sites match your filters.'}
+              {sites.length === 0 ? 'No sites generated yet.' : search ? `No sites matching "${search}"` : 'No sites match your filters.'}
             </p>
             {sites.length === 0 && (
               <Link

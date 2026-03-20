@@ -130,7 +130,6 @@ export interface IntakeFormData {
   industry: string;
   services: string[];
   existing_website?: string;
-  reference_site_url?: string;
   logo_url?: string;
   uploaded_assets?: UploadedAsset[];
 }

@@ -21,13 +21,7 @@ export async function GET(
       return NextResponse.json({ error: 'Site not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ site }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'CDN-Cache-Control': 'no-store',
-        'Vercel-CDN-Cache-Control': 'no-store',
-      },
-    });
+    return NextResponse.json({ site });
   } catch (error) {
     console.error('Error fetching site:', error);
     return NextResponse.json({ error: 'Failed to fetch site' }, { status: 500 });

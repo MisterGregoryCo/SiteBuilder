@@ -6,7 +6,6 @@ import { PLUMBING_CONTEXT } from './prompts/industries/plumbing';
 import { HVAC_CONTEXT } from './prompts/industries/hvac';
 import { ELECTRICAL_CONTEXT } from './prompts/industries/electrical';
 import { LANDSCAPING_CONTEXT } from './prompts/industries/landscaping';
-import { getReferenceSites } from './reference-sites';
 import type { IntakeFormData, SiteConfig, SiteTemplate } from '../types/site-config';
 
 const INDUSTRY_CONTEXTS: Record<string, string> = {
@@ -17,96 +16,6 @@ const INDUSTRY_CONTEXTS: Record<string, string> = {
   electrical: ELECTRICAL_CONTEXT,
   landscaping: LANDSCAPING_CONTEXT,
 };
-
-/**
- * Fetch a URL and extract meaningful text content for AI analysis.
- * Returns a trimmed summary (max ~2000 chars) or null on failure.
- */
-async function fetchSiteContent(url: string): Promise<string | null> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'ProSet-SiteBuilder/1.0 (site-analysis)',
-        'Accept': 'text/html',
-      },
-    });
-    clearTimeout(timeout);
-
-    if (!res.ok) return null;
-
-    const html = await res.text();
-
-    // Strip scripts, styles, and HTML tags to get raw text
-    const cleaned = html
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-      .replace(/<footer[\s\S]*?<\/footer>/gi, '')
-      .replace(/<header[\s\S]*?<\/header>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/&[a-z]+;/gi, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // Extract the most meaningful content (first 2000 chars after cleanup)
-    return cleaned.slice(0, 2000) || null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Build reference site analysis context for the AI prompt.
- * Fetches industry defaults + any user-provided reference URL.
- */
-async function buildReferenceContext(
-  industry: string,
-  userReferenceUrl?: string
-): Promise<string> {
-  const urls = getReferenceSites(industry);
-  if (userReferenceUrl) {
-    urls.push(userReferenceUrl);
-  }
-
-  if (urls.length === 0) return '';
-
-  // Fetch all reference sites in parallel (with 8s timeout each)
-  const results = await Promise.allSettled(
-    urls.map(async (url) => {
-      const content = await fetchSiteContent(url);
-      return content ? { url, content } : null;
-    })
-  );
-
-  const analyses = results
-    .map((r) => (r.status === 'fulfilled' ? r.value : null))
-    .filter(Boolean) as { url: string; content: string }[];
-
-  if (analyses.length === 0) return '';
-
-  const sections = analyses.map(
-    (a) =>
-      `--- Reference: ${a.url} ---\n${a.content}`
-  );
-
-  return `
-REFERENCE SITE ANALYSIS:
-The following are premium reference websites you should study and match in quality. Analyze their copywriting style, tone, section structure, headline patterns, CTA language, trust signals, and overall professionalism. Your output should match or exceed this caliber.
-
-${sections.join('\n\n')}
-
-KEY TAKEAWAYS TO APPLY:
-- Match the confident, professional tone of these reference sites
-- Use similar headline structures (short, punchy, city-specific)
-- Mirror the trust signal patterns (stats, badges, guarantees)
-- Match the CTA urgency and phrasing style
-- Keep the same level of specificity and detail in service descriptions
-`;
-}
 
 export async function generateSiteCopy(
   intake: IntakeFormData,
@@ -123,12 +32,6 @@ export async function generateSiteCopy(
   });
 
   const industryContext = INDUSTRY_CONTEXTS[intake.industry] || '';
-
-  // Fetch and analyze reference sites (runs in parallel while we build the prompt)
-  const referenceContext = await buildReferenceContext(
-    intake.industry,
-    intake.reference_site_url
-  );
 
   // Build context about existing website and uploaded assets
   const websiteContext = intake.existing_website
@@ -149,12 +52,10 @@ Email: ${intake.business_email}
 Services Offered: ${intake.services.join(', ')}${websiteContext}${assetsContext}
 
 ${industryContext}
-${referenceContext}
+
 ${OUTPUT_SCHEMA}
 
 Generate copy for ALL ${intake.services.length} services listed above. Each service must have its own entry in the services array.
-
-QUALITY STANDARD: This copy will be used on a $5,000-quality premium dark-themed website. Write accordingly — no generic filler, no weak headlines, no bland descriptions. Every word should sell.
 
 Return ONLY the JSON object. No markdown, no code fences, no explanation.`;
 

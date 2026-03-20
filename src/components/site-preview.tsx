@@ -32,15 +32,12 @@ export function SitePreview({ site, onPublish, onRegenerate, isPublishing }: Sit
             <div className="w-3 h-3 rounded-full" style={{ background: '#22C55E' }} />
           </div>
           <div className="flex-1 mx-4">
-            <a
-              href={previewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded px-3 py-1 text-sm text-center transition-colors hover:text-white"
+            <div
+              className="rounded px-3 py-1 text-sm text-center"
               style={{ background: '#0A0A0A', border: '1px solid #2A2A2A', color: '#6B7280' }}
             >
               {liveUrl}
-            </a>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button

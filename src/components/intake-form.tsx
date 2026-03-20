@@ -212,28 +212,6 @@ export function IntakeForm({ onSubmit, isLoading }: IntakeFormProps) {
         />
       </div>
 
-      {/* Reference Site */}
-      <div>
-        <h3 className="text-lg font-semibold text-white mb-2">Reference Site</h3>
-        <p className="text-sm mb-4" style={{ color: '#9CA3AF' }}>
-          Paste a URL of a website you love the look/feel of. We&apos;ll analyze its design quality and match that caliber.
-        </p>
-        <input
-          type="text"
-          value={formData.reference_site_url || ''}
-          onChange={(e) => setFormData({ ...formData, reference_site_url: e.target.value })}
-          onBlur={(e) => {
-            const val = e.target.value.trim();
-            if (val && !val.startsWith('http://') && !val.startsWith('https://')) {
-              setFormData({ ...formData, reference_site_url: `https://${val}` });
-            }
-          }}
-          className="w-full px-4 py-2.5 rounded-lg focus:ring-2 focus:border-transparent outline-none placeholder-gray-600"
-          style={{ ...inputStyle, '--tw-ring-color': '#E8762D' } as React.CSSProperties}
-          placeholder="https://example.com"
-        />
-      </div>
-
       {/* File Uploads */}
       <div>
         <h3 className="text-lg font-semibold text-white mb-2">Logo &amp; Assets</h3>

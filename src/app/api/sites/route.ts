@@ -27,13 +27,7 @@ export async function GET() {
         : 0,
     }));
 
-    return NextResponse.json({ sites: sitesWithCounts }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'CDN-Cache-Control': 'no-store',
-        'Vercel-CDN-Cache-Control': 'no-store',
-      },
-    });
+    return NextResponse.json({ sites: sitesWithCounts });
   } catch (error) {
     console.error('Error fetching sites:', error);
     return NextResponse.json({ error: 'Failed to fetch sites' }, { status: 500 });

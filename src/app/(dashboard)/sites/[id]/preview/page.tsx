@@ -118,32 +118,17 @@ export default function PreviewPage() {
               {site.status}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <a
-              href={`/render/${site.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-1.5 text-sm font-medium rounded-lg transition-all hover:scale-105 flex items-center gap-2"
-              style={{ background: '#E8762D', color: '#FFFFFF' }}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-              View Full Site
-            </a>
+          {site.status === 'published' && (
             <button
               onClick={() => {
-                const url = site.status === 'published'
-                  ? `https://${site.slug}.${process.env.NEXT_PUBLIC_RENDERER_DOMAIN || 'prosetpages.com'}`
-                  : `${window.location.origin}/render/${site.slug}`;
-                navigator.clipboard.writeText(url);
+                navigator.clipboard.writeText(`https://${site.slug}.${process.env.NEXT_PUBLIC_RENDERER_DOMAIN || 'prosetpages.com'}`);
               }}
               className="px-4 py-1.5 text-sm rounded-lg transition-colors hover:bg-opacity-80"
               style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#9CA3AF' }}
             >
               Copy Link
             </button>
-          </div>
+          )}
         </div>
       </div>
 
