@@ -197,12 +197,18 @@ export function IntakeForm({ onSubmit, isLoading }: IntakeFormProps) {
           If the business has an existing website, enter it below. We&apos;ll reference it for branding cues and content.
         </p>
         <input
-          type="url"
+          type="text"
           value={formData.existing_website || ''}
           onChange={(e) => setFormData({ ...formData, existing_website: e.target.value })}
+          onBlur={(e) => {
+            const val = e.target.value.trim();
+            if (val && !val.startsWith('http://') && !val.startsWith('https://')) {
+              setFormData({ ...formData, existing_website: `https://${val}` });
+            }
+          }}
           className="w-full px-4 py-2.5 rounded-lg focus:ring-2 focus:border-transparent outline-none placeholder-gray-600"
           style={{ ...inputStyle, '--tw-ring-color': '#E8762D' } as React.CSSProperties}
-          placeholder="https://www.example.com"
+          placeholder="example.com"
         />
       </div>
 
