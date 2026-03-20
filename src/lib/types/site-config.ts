@@ -1,6 +1,9 @@
 // TypeScript interfaces for the ProSet Site Builder
 
 export interface SiteConfig {
+  logo_url?: string;
+  existing_website?: string;
+  uploaded_assets?: UploadedAsset[];
   meta: {
     title: string;
     description: string;
@@ -126,7 +129,16 @@ export interface IntakeFormData {
   business_state: string;
   industry: string;
   services: string[];
+  existing_website?: string;
   logo_url?: string;
+  uploaded_assets?: UploadedAsset[];
+}
+
+export interface UploadedAsset {
+  name: string;
+  url: string;
+  type: 'logo' | 'photo' | 'document' | 'other';
+  size: number;
 }
 
 export const INDUSTRIES = [

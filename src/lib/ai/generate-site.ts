@@ -33,6 +33,15 @@ export async function generateSiteCopy(
 
   const industryContext = INDUSTRY_CONTEXTS[intake.industry] || '';
 
+  // Build context about existing website and uploaded assets
+  const websiteContext = intake.existing_website
+    ? `\nExisting Website: ${intake.existing_website}\nNote: This business has an existing website. Reference it for tone, messaging style, and any unique selling points they already emphasize. Match or improve on their current positioning.`
+    : '';
+
+  const assetsContext = intake.uploaded_assets?.length
+    ? `\nUploaded Assets: ${intake.uploaded_assets.map(a => `${a.name} (${a.type})`).join(', ')}\nNote: The business has provided brand assets including ${intake.uploaded_assets.some(a => a.type === 'logo') ? 'their logo, ' : ''}${intake.uploaded_assets.some(a => a.type === 'photo') ? 'business photos, ' : ''}${intake.uploaded_assets.some(a => a.type === 'document') ? 'brand documents, ' : ''}which will be used on the site. Write copy that complements professional visual branding.`
+    : '';
+
   const userPrompt = `Generate website copy for this local service business:
 
 Business Name: ${intake.business_name}
@@ -40,7 +49,7 @@ City: ${intake.business_city}${intake.business_state ? `, ${intake.business_stat
 Industry: ${intake.industry}
 Phone: ${intake.business_phone}
 Email: ${intake.business_email}
-Services Offered: ${intake.services.join(', ')}
+Services Offered: ${intake.services.join(', ')}${websiteContext}${assetsContext}
 
 ${industryContext}
 
@@ -76,6 +85,9 @@ Return ONLY the JSON object. No markdown, no code fences, no explanation.`;
 
   // Assemble full site config by merging AI copy with template data
   const siteConfig: SiteConfig = {
+    logo_url: intake.logo_url || undefined,
+    existing_website: intake.existing_website || undefined,
+    uploaded_assets: intake.uploaded_assets || undefined,
     meta: {
       title: generatedCopy.meta.title,
       description: generatedCopy.meta.description,
