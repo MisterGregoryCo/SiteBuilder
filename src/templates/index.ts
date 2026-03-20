@@ -12,8 +12,9 @@ const TEMPLATES: Record<string, ComponentType<{ site: Site }>> = {
 
 // Industry to default template mapping
 const INDUSTRY_TEMPLATES: Record<string, string> = {
+  generic: 'roofing-premium', // Uses same layout, colors come from template config
   roofing: 'roofing-premium',
-  plumbing: 'roofing-premium', // Fallback until dedicated template exists
+  plumbing: 'roofing-premium',
   hvac: 'roofing-premium',
   electrical: 'roofing-premium',
   landscaping: 'roofing-premium',

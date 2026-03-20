@@ -34,17 +34,23 @@ export function GenerationProgress() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
       {/* Animated spinner */}
       <div className="relative w-20 h-20 mb-8">
-        <div className="absolute inset-0 rounded-full border-4 border-gray-200" />
-        <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
-        <div className="absolute inset-2 rounded-full border-4 border-blue-300 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+        <div className="absolute inset-0 rounded-full" style={{ border: '4px solid #2A2A2A' }} />
+        <div
+          className="absolute inset-0 rounded-full animate-spin"
+          style={{ border: '4px solid transparent', borderTopColor: '#E8762D' }}
+        />
+        <div
+          className="absolute inset-2 rounded-full animate-spin"
+          style={{ border: '4px solid transparent', borderBottomColor: '#F59E4B', animationDirection: 'reverse', animationDuration: '1.5s' }}
+        />
       </div>
 
       {/* Stage indicator */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-white mb-2">
           Creating Your Website
         </h2>
-        <p className="text-gray-600 text-lg mb-8 transition-all duration-500">
+        <p className="text-lg mb-8 transition-all duration-500" style={{ color: '#9CA3AF' }}>
           {STAGES[currentStage]?.label}
         </p>
 
@@ -53,15 +59,17 @@ export function GenerationProgress() {
           {STAGES.map((_, index) => (
             <div
               key={index}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                index <= currentStage ? 'bg-blue-500 scale-100' : 'bg-gray-300 scale-75'
-              }`}
+              className="w-2.5 h-2.5 rounded-full transition-all duration-500"
+              style={{
+                background: index <= currentStage ? '#E8762D' : '#2A2A2A',
+                transform: index <= currentStage ? 'scale(1)' : 'scale(0.75)',
+              }}
             />
           ))}
         </div>
       </div>
 
-      <p className="mt-8 text-sm text-gray-400">
+      <p className="mt-8 text-sm" style={{ color: '#6B7280' }}>
         This usually takes 5-8 seconds
       </p>
     </div>

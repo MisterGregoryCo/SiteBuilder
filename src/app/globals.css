@@ -3,21 +3,36 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --proset-orange: #E8762D;
+  --proset-orange-light: #F59E4B;
+  --proset-orange-dark: #C45E1A;
+  --proset-bg: #0A0A0A;
+  --proset-card: #111111;
+  --proset-surface: #1A1A1A;
+  --proset-border: #2A2A2A;
+  --proset-text: #FFFFFF;
+  --proset-text-secondary: #9CA3AF;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--proset-text);
+  background: var(--proset-bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ProSet branded scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--proset-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--proset-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
 }
 
 @layer utilities {

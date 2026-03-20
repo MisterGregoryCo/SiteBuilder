@@ -16,7 +16,6 @@ export default function PreviewPage() {
     try {
       const res = await fetch(`/api/sites?id=${params.id}`);
       const data = await res.json();
-      // Find the specific site from the list
       const found = data.sites?.find((s: Site) => s.id === params.id);
       if (found) setSite(found);
     } catch (error) {
@@ -53,24 +52,23 @@ export default function PreviewPage() {
   };
 
   const handleRegenerate = () => {
-    // Navigate back to new site page — in v1, regeneration is just starting over
     router.push('/sites/new');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading preview...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0A0A0A' }}>
+        <p style={{ color: '#9CA3AF' }}>Loading preview...</p>
       </div>
     );
   }
 
   if (!site) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0A0A0A' }}>
         <div className="text-center">
-          <p className="text-gray-500 mb-4">Site not found</p>
-          <button onClick={() => router.push('/sites')} className="text-blue-600 underline">
+          <p className="mb-4" style={{ color: '#9CA3AF' }}>Site not found</p>
+          <button onClick={() => router.push('/sites')} style={{ color: '#E8762D' }} className="underline">
             Back to Sites
           </button>
         </div>
@@ -79,30 +77,32 @@ export default function PreviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0A' }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shrink-0">
+      <header className="shrink-0" style={{ background: '#111111', borderBottom: '1px solid #2A2A2A' }}>
         <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <button
               onClick={() => router.push('/sites')}
-              className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-1"
+              className="text-sm flex items-center gap-1 mb-1 hover:text-white transition-colors"
+              style={{ color: '#9CA3AF' }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back to Sites
             </button>
-            <h1 className="text-xl font-bold text-gray-900">{site.business_name}</h1>
+            <h1 className="text-xl font-bold text-white">{site.business_name}</h1>
           </div>
           {site.status === 'published' && (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-green-600 font-medium">Live</span>
+              <span className="text-sm font-medium" style={{ color: '#22C55E' }}>Live</span>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(`https://${site.slug}.${process.env.NEXT_PUBLIC_RENDERER_DOMAIN || 'prosetpages.com'}`);
                 }}
-                className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                className="px-4 py-2 text-sm rounded-lg"
+                style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#9CA3AF' }}
               >
                 Copy Link
               </button>

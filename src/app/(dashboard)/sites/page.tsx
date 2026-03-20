@@ -51,17 +51,26 @@ export default function SitesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: '#0A0A0A' }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header style={{ background: '#111111', borderBottom: '1px solid #2A2A2A' }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">ProSet Site Builder</h1>
-            <p className="text-sm text-gray-500">Generate professional websites in under 2 minutes</p>
+          <div className="flex items-center gap-3">
+            {/* ProSet Logo */}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#E8762D' }}>
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">ProSet <span style={{ color: '#E8762D' }}>Site Builder</span></h1>
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>Generate professional websites in under 2 minutes</p>
+            </div>
           </div>
           <Link
             href="/sites/new"
-            className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all hover:opacity-90 flex items-center gap-2"
+            style={{ background: '#E8762D' }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -75,14 +84,14 @@ export default function SitesPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total Sites', value: stats.total, color: 'blue' },
-            { label: 'Published', value: stats.published, color: 'green' },
-            { label: 'Drafts', value: stats.draft, color: 'yellow' },
-            { label: 'Total Leads', value: stats.totalLeads, color: 'purple' },
+            { label: 'Total Sites', value: stats.total, accent: false },
+            { label: 'Published', value: stats.published, accent: false },
+            { label: 'Drafts', value: stats.draft, accent: false },
+            { label: 'Total Leads', value: stats.totalLeads, accent: true },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-4">
-              <p className="text-sm text-gray-500">{stat.label}</p>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+            <div key={stat.label} className="rounded-xl p-4" style={{ background: '#111111', border: '1px solid #2A2A2A' }}>
+              <p className="text-sm" style={{ color: '#9CA3AF' }}>{stat.label}</p>
+              <p className="text-2xl font-bold" style={{ color: stat.accent ? '#E8762D' : '#FFFFFF' }}>{stat.value}</p>
             </div>
           ))}
         </div>
@@ -92,7 +101,8 @@ export default function SitesPage() {
           <select
             value={filter.status}
             onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            className="px-3 py-2 rounded-lg text-sm text-white outline-none"
+            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
           >
             <option value="all">All Status</option>
             <option value="published">Published</option>
@@ -102,9 +112,11 @@ export default function SitesPage() {
           <select
             value={filter.industry}
             onChange={(e) => setFilter({ ...filter, industry: e.target.value })}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            className="px-3 py-2 rounded-lg text-sm text-white outline-none"
+            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
           >
             <option value="all">All Industries</option>
+            <option value="generic">Generic / Other</option>
             <option value="roofing">Roofing</option>
             <option value="plumbing">Plumbing</option>
             <option value="hvac">HVAC</option>
@@ -115,16 +127,17 @@ export default function SitesPage() {
 
         {/* Site Grid */}
         {loading ? (
-          <div className="text-center py-20 text-gray-500">Loading sites...</div>
+          <div className="text-center py-20" style={{ color: '#9CA3AF' }}>Loading sites...</div>
         ) : filteredSites.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 mb-4">
+            <p className="mb-4" style={{ color: '#9CA3AF' }}>
               {sites.length === 0 ? 'No sites generated yet.' : 'No sites match your filters.'}
             </p>
             {sites.length === 0 && (
               <Link
                 href="/sites/new"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+                className="inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-lg hover:opacity-90"
+                style={{ background: '#E8762D' }}
               >
                 Generate Your First Site
               </Link>

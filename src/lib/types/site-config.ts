@@ -130,6 +130,7 @@ export interface IntakeFormData {
 }
 
 export const INDUSTRIES = [
+  { value: 'generic', label: 'Generic / Other' },
   { value: 'roofing', label: 'Roofing / Construction' },
   { value: 'plumbing', label: 'Plumbing' },
   { value: 'hvac', label: 'HVAC' },
@@ -138,6 +139,18 @@ export const INDUSTRIES = [
 ] as const;
 
 export const INDUSTRY_SERVICES: Record<string, string[]> = {
+  generic: [
+    'Consultation',
+    'Project Management',
+    'Maintenance & Repair',
+    'Installation',
+    'Custom Solutions',
+    'Emergency Services',
+    'Inspection',
+    'Design & Planning',
+    'Training & Education',
+    'Support & Warranty',
+  ],
   roofing: [
     'Roof Replacement',
     'Roof Repair',

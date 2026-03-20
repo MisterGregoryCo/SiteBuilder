@@ -1,9 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { SYSTEM_PROMPT, OUTPUT_SCHEMA } from './prompts/system';
 import { ROOFING_CONTEXT } from './prompts/industries/roofing';
+import { GENERIC_CONTEXT } from './prompts/industries/generic';
 import type { IntakeFormData, SiteConfig, SiteTemplate } from '../types/site-config';
 
 const INDUSTRY_CONTEXTS: Record<string, string> = {
+  generic: GENERIC_CONTEXT,
   roofing: ROOFING_CONTEXT,
 };
 
