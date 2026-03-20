@@ -12,6 +12,7 @@ export default function NewSitePage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('intake');
   const [error, setError] = useState('');
+
   const handleGenerate = async (data: IntakeFormData) => {
     setStep('generating');
     setError('');
@@ -38,30 +39,18 @@ export default function NewSitePage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#0A0A0A' }}>
-      {/* Header */}
-      <header style={{ background: '#111111', borderBottom: '1px solid #2A2A2A' }}>
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <button
-            onClick={() => router.push('/sites')}
-            className="text-sm flex items-center gap-1 mb-2 hover:text-white transition-colors"
-            style={{ color: '#9CA3AF' }}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Sites
-          </button>
-          <h1 className="text-2xl font-bold text-white">Generate New Site</h1>
-          <p className="text-sm" style={{ color: '#9CA3AF' }}>Fill in the business details and we&apos;ll generate a complete website in seconds.</p>
-        </div>
-      </header>
-
+    <div>
       <div className="max-w-4xl mx-auto px-6 py-8">
         {step === 'intake' && (
-          <div className="rounded-xl p-6 md:p-8" style={{ background: '#111111', border: '1px solid #2A2A2A' }}>
-            <IntakeForm onSubmit={handleGenerate} isLoading={false} />
-          </div>
+          <>
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold text-white">Generate New Site</h1>
+              <p className="text-sm" style={{ color: '#9CA3AF' }}>Fill in the business details and we&apos;ll generate a complete website in seconds.</p>
+            </div>
+            <div className="rounded-xl p-6 md:p-8" style={{ background: '#111111', border: '1px solid #2A2A2A' }}>
+              <IntakeForm onSubmit={handleGenerate} isLoading={false} />
+            </div>
+          </>
         )}
 
         {step === 'generating' && <GenerationProgress />}

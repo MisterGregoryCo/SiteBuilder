@@ -51,35 +51,7 @@ export default function SitesPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#0A0A0A' }}>
-      {/* Header */}
-      <header style={{ background: '#111111', borderBottom: '1px solid #2A2A2A' }}>
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* ProSet Logo */}
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#E8762D' }}>
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">ProSet <span style={{ color: '#E8762D' }}>Site Builder</span></h1>
-              <p className="text-xs" style={{ color: '#9CA3AF' }}>Generate professional websites in under 2 minutes</p>
-            </div>
-          </div>
-          <Link
-            href="/sites/new"
-            className="px-6 py-2.5 text-white font-semibold rounded-lg transition-all hover:opacity-90 flex items-center gap-2"
-            style={{ background: '#E8762D' }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            New Site
-          </Link>
-        </div>
-      </header>
-
+    <div>
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
