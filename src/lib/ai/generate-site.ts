@@ -2,11 +2,19 @@ import Anthropic from '@anthropic-ai/sdk';
 import { SYSTEM_PROMPT, OUTPUT_SCHEMA } from './prompts/system';
 import { ROOFING_CONTEXT } from './prompts/industries/roofing';
 import { GENERIC_CONTEXT } from './prompts/industries/generic';
+import { PLUMBING_CONTEXT } from './prompts/industries/plumbing';
+import { HVAC_CONTEXT } from './prompts/industries/hvac';
+import { ELECTRICAL_CONTEXT } from './prompts/industries/electrical';
+import { LANDSCAPING_CONTEXT } from './prompts/industries/landscaping';
 import type { IntakeFormData, SiteConfig, SiteTemplate } from '../types/site-config';
 
 const INDUSTRY_CONTEXTS: Record<string, string> = {
   generic: GENERIC_CONTEXT,
   roofing: ROOFING_CONTEXT,
+  plumbing: PLUMBING_CONTEXT,
+  hvac: HVAC_CONTEXT,
+  electrical: ELECTRICAL_CONTEXT,
+  landscaping: LANDSCAPING_CONTEXT,
 };
 
 export async function generateSiteCopy(
