@@ -2,6 +2,7 @@
 
 import { Site } from '@/lib/types/site-config';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { LogoBrand } from '../shared/logo-brand';
 
 /* ═══════════════════════════════════════════════════════════
    ROOFING PREMIUM — "Editorial Premium" Layout B
@@ -63,9 +64,7 @@ export function RoofingPremiumTemplate({ site }: { site: Site }) {
           borderBottom: navSolid ? `1px solid ${C.borderLight}` : '1px solid transparent',
         }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-          <span className="text-lg font-bold text-white tracking-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
-            {cfg.footer.business_name}
-          </span>
+          <LogoBrand logoUrl={cfg.logo_url} businessName={cfg.footer.business_name} fontFamily='Georgia, "Times New Roman", serif' />
           <div className="hidden md:flex items-center gap-8">
             {['Services', 'About', 'Contact'].map(s => (
               <a key={s} href={`#${s.toLowerCase()}`} className="text-sm font-medium text-gray-300 hover:text-white transition-colors">{s}</a>

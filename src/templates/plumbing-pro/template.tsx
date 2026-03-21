@@ -2,6 +2,7 @@
 
 import { Site } from '@/lib/types/site-config';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { LogoBrand } from '../shared/logo-brand';
 
 /* ═══════════════════════════════════════════════════════════
    PLUMBING PRO — "Clean Flow" Layout C
@@ -32,7 +33,7 @@ export function PlumbingProTemplate({ site }: { site: Site }) {
       <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
         style={{ background: navSolid ? 'rgba(255,255,255,0.95)' : 'transparent', backdropFilter: navSolid ? 'blur(16px)' : 'none', borderBottom: navSolid ? `1px solid ${C.border}` : '1px solid transparent' }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-          <span className="text-lg font-bold" style={{ color: navSolid ? C.blue : C.white }}>{cfg.footer.business_name}</span>
+          <LogoBrand logoUrl={cfg.logo_url} businessName={cfg.footer.business_name} color={navSolid ? C.blue : C.white} />
           <div className="hidden md:flex items-center gap-8">
             {['Services', 'About', 'Contact'].map(s => (<a key={s} href={`#${s.toLowerCase()}`} className="text-sm font-medium transition-colors" style={{ color: navSolid ? C.textMuted : 'rgba(255,255,255,0.8)' }}>{s}</a>))}
             <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g, '')}`} className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:scale-105" style={{ background: C.teal }}>{cfg.hero.cta_phone}</a>

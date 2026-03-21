@@ -2,6 +2,7 @@
 
 import { Site } from '@/lib/types/site-config';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { LogoBrand } from '../shared/logo-brand';
 
 /* ═══════════════════════════════════════════════════════════
    ELECTRICAL POWER — "Power Dark" Layout A variant
@@ -36,7 +37,7 @@ export function ElectricalPowerTemplate({ site }: { site: Site }) {
 
       <nav className="fixed top-1 left-0 right-0 z-50 transition-all duration-500" style={{ background: navSolid ? `${C.bg}ee` : 'transparent', backdropFilter: navSolid ? 'blur(16px)' : 'none', borderBottom: navSolid ? `1px solid ${C.border}` : '1px solid transparent' }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-          <span className="text-lg font-black tracking-tight uppercase" style={{ color: C.yellow }}>{cfg.footer.business_name}</span>
+          <LogoBrand logoUrl={cfg.logo_url} businessName={cfg.footer.business_name} color={C.yellow} className="uppercase font-black" />
           <div className="hidden md:flex items-center gap-8">
             {['Services','About','Contact'].map(s=>(<a key={s} href={`#${s.toLowerCase()}`} className="text-sm font-medium transition-colors" style={{ color: C.gray }}>{s}</a>))}
             <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g,'')}`} className="px-5 py-2.5 text-sm font-bold transition-all hover:scale-105" style={{ background: C.yellow, color: C.bg }}>{cfg.hero.cta_phone}</a>

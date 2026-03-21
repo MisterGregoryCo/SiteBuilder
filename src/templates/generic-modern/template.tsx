@@ -2,6 +2,7 @@
 
 import { Site } from '@/lib/types/site-config';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { LogoBrand } from '../shared/logo-brand';
 
 /* ═══════════════════════════════════════════════════════════
    GENERIC MODERN — "Dark Modern" Layout A
@@ -69,7 +70,7 @@ export function GenericModernTemplate({ site }: { site: Site }) {
         }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-          <span className="text-lg font-bold tracking-tight">{cfg.footer.business_name}</span>
+          <LogoBrand logoUrl={cfg.logo_url} businessName={cfg.footer.business_name} />
           <div className="hidden md:flex items-center gap-8">
             {['Services', 'About', 'Contact'].map(s => (
               <a key={s} href={`#${s.toLowerCase()}`} className="text-sm transition-colors duration-200" style={{ color: C.gray400 }}

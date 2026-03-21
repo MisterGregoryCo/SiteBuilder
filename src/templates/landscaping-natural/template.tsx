@@ -2,6 +2,7 @@
 
 import { Site } from '@/lib/types/site-config';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { LogoBrand } from '../shared/logo-brand';
 
 /* ═══════════════════════════════════════════════════════════
    LANDSCAPING NATURAL — "Natural Organic" Layout C variant
@@ -32,7 +33,7 @@ export function LandscapingNaturalTemplate({ site }: { site: Site }) {
     <div className="min-h-screen" style={{ background: C.cream, fontFamily: "'Inter', system-ui, sans-serif", color: C.text }}>
       <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-500" style={{ background: navSolid ? 'rgba(254,252,232,0.95)' : 'transparent', backdropFilter: navSolid ? 'blur(16px)' : 'none', borderBottom: navSolid ? `1px solid ${C.border}` : '1px solid transparent' }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
-          <span className="text-lg font-bold" style={{ color: navSolid ? C.green : C.white, fontFamily: 'Georgia, serif' }}>{cfg.footer.business_name}</span>
+          <LogoBrand logoUrl={cfg.logo_url} businessName={cfg.footer.business_name} color={navSolid ? C.green : C.white} fontFamily="Georgia, serif" />
           <div className="hidden md:flex items-center gap-8">
             {['Services','About','Contact'].map(s=>(<a key={s} href={`#${s.toLowerCase()}`} className="text-sm font-medium transition-colors" style={{ color: navSolid ? C.textMuted : 'rgba(255,255,255,0.8)' }}>{s}</a>))}
             <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g,'')}`} className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:scale-105" style={{ background: C.green }}>{cfg.hero.cta_phone}</a>
