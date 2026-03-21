@@ -14,9 +14,22 @@ interface SiteCardProps {
     status: string;
     created_at: string;
     submission_count: number;
+    site_config?: {
+      hero?: { background_image?: string; headline?: string };
+      footer?: { business_name?: string };
+    };
   };
   onDelete?: (id: string) => void;
 }
+
+const INDUSTRY_COLORS: Record<string, string> = {
+  generic: '#E8762D',
+  roofing: '#C9A84C',
+  plumbing: '#0D9488',
+  hvac: '#059669',
+  electrical: '#EAB308',
+  landscaping: '#84CC16',
+};
 
 export function SiteCard({ site, onDelete }: SiteCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -30,6 +43,8 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
 
   const status = statusStyles[site.status] || statusStyles.draft;
   const rendererDomain = process.env.NEXT_PUBLIC_RENDERER_DOMAIN || 'prosetpages.com';
+  const heroImage = site.site_config?.hero?.background_image;
+  const accentColor = INDUSTRY_COLORS[site.industry] || '#E8762D';
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -48,95 +63,108 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
 
   return (
     <div
-      className="rounded-xl p-5 transition-all hover:border-gray-600 relative"
+      className="group rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1 relative"
       style={{ background: '#111111', border: '1px solid #2A2A2A' }}
     >
       {/* Delete confirmation overlay */}
       {showConfirm && (
-        <div className="absolute inset-0 z-10 rounded-xl flex flex-col items-center justify-center gap-4 p-6" style={{ background: 'rgba(10,10,10,0.95)' }}>
+        <div className="absolute inset-0 z-10 rounded-2xl flex flex-col items-center justify-center gap-4 p-6" style={{ background: 'rgba(10,10,10,0.95)' }}>
           <p className="text-white text-sm text-center font-medium">
-            Delete <strong>{site.business_name}</strong>? This cannot be undone.
+            Delete <strong>{site.business_name}</strong>?<br />
+            <span style={{ color: '#9CA3AF' }}>This cannot be undone.</span>
           </p>
           <div className="flex gap-3">
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-              style={{ background: '#EF4444' }}
-            >
+            <button onClick={handleDelete} disabled={deleting}
+              className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+              style={{ background: '#EF4444' }}>
               {deleting ? 'Deleting...' : 'Delete'}
             </button>
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-              style={{ background: '#2A2A2A', color: '#9CA3AF' }}
-            >
+            <button onClick={() => setShowConfirm(false)}
+              className="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all"
+              style={{ background: '#2A2A2A', color: '#9CA3AF' }}>
               Cancel
             </button>
           </div>
         </div>
       )}
 
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="font-semibold text-white text-lg">{site.business_name}</h3>
-          <p className="text-sm" style={{ color: '#9CA3AF' }}>
-            {site.business_city}{site.business_state ? `, ${site.business_state}` : ''}
-          </p>
+      {/* Preview Image */}
+      <Link href={`/sites/${site.id}/preview`} className="block relative">
+        <div className="relative h-48 overflow-hidden">
+          {heroImage ? (
+            <>
+              <img src={heroImage} alt={site.business_name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center" style={{ background: '#1A1A1A' }}>
+              <svg className="w-12 h-12" style={{ color: '#2A2A2A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </div>
+          )}
+
+          {/* Status badge on image */}
+          <div className="absolute top-3 left-3">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm"
+              style={{ background: status.bg, color: status.text, border: '1px solid rgba(255,255,255,0.05)' }}>
+              {site.status}
+            </span>
+          </div>
+
+          {/* Industry accent tag */}
+          <div className="absolute top-3 right-3">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm capitalize"
+              style={{ background: `${accentColor}20`, color: accentColor, border: `1px solid ${accentColor}30` }}>
+              {site.industry}
+            </span>
+          </div>
+
+          {/* Business name overlay on image */}
+          <div className="absolute bottom-3 left-3 right-3">
+            <h3 className="font-bold text-white text-lg leading-tight drop-shadow-lg">{site.business_name}</h3>
+            <p className="text-xs text-gray-300 mt-0.5">
+              {site.business_city}{site.business_state ? `, ${site.business_state}` : ''}
+            </p>
+          </div>
         </div>
+      </Link>
+
+      {/* Card Body */}
+      <div className="p-4">
+        {/* Meta row */}
+        <div className="flex items-center justify-between text-xs mb-4" style={{ color: '#6B7280' }}>
+          <span>{new Date(site.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span style={{ color: accentColor }}>{site.submission_count} lead{site.submission_count !== 1 ? 's' : ''}</span>
+        </div>
+
+        {site.status === 'published' && (
+          <p className="text-[11px] mb-3 break-all font-mono" style={{ color: '#4B5563' }}>
+            {site.slug}.{rendererDomain}
+          </p>
+        )}
+
+        {/* Actions */}
         <div className="flex items-center gap-2">
-          <span
-            className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-            style={{ background: status.bg, color: status.text }}
-          >
-            {site.status}
-          </span>
-          {/* Delete button */}
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10"
-            title="Delete site"
-          >
-            <svg className="w-4 h-4" style={{ color: '#6B7280' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Link href={`/sites/${site.id}/preview`}
+            className="flex-1 text-center py-2.5 text-sm font-semibold rounded-lg transition-all hover:opacity-80"
+            style={{ background: `${accentColor}15`, color: accentColor }}>
+            Preview
+          </Link>
+          {site.status === 'published' && (
+            <a href={`https://${site.slug}.${rendererDomain}`} target="_blank" rel="noopener noreferrer"
+              className="flex-1 text-center py-2.5 text-sm font-semibold rounded-lg transition-all hover:opacity-80"
+              style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' }}>
+              View Live
+            </a>
+          )}
+          <button onClick={() => setShowConfirm(true)} title="Delete site"
+            className="p-2.5 rounded-lg transition-colors hover:bg-red-500/10">
+            <svg className="w-4 h-4" style={{ color: '#4B5563' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
         </div>
-      </div>
-
-      <div className="flex items-center gap-4 text-sm mb-4" style={{ color: '#6B7280' }}>
-        <span className="capitalize">{site.industry}</span>
-        <span>|</span>
-        <span>{new Date(site.created_at).toLocaleDateString()}</span>
-        <span>|</span>
-        <span style={{ color: '#E8762D' }}>{site.submission_count} leads</span>
-      </div>
-
-      {site.status === 'published' && (
-        <p className="text-xs mb-4 break-all" style={{ color: '#6B7280' }}>
-          {site.slug}.{rendererDomain}
-        </p>
-      )}
-
-      <div className="flex items-center gap-2">
-        <Link
-          href={`/sites/${site.id}/preview`}
-          className="flex-1 text-center py-2 text-sm font-medium rounded-lg transition-colors"
-          style={{ background: 'rgba(232, 118, 45, 0.1)', color: '#E8762D' }}
-        >
-          Preview
-        </Link>
-        {site.status === 'published' && (
-          <a
-            href={`https://${site.slug}.${rendererDomain}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 text-center py-2 text-sm font-medium rounded-lg transition-colors"
-            style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' }}
-          >
-            View Live
-          </a>
-        )}
       </div>
     </div>
   );
