@@ -1,343 +1,165 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
 import { Site } from '@/lib/types/site-config';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-interface PlumbingServiceItem {
-  name: string;
-  description: string;
-  image?: string;
-}
+/* ═══════════════════════════════════════════════════════════
+   PLUMBING PRO — "Clean Flow" Layout C
+   Light backgrounds, deep blue + teal, wave dividers,
+   horizontal service cards, clean trustworthy feel
+   ═══════════════════════════════════════════════════════════ */
 
-interface StatsItem {
-  label: string;
-  value: string;
+const C = {
+  blue: '#0C4A6E', blueLight: '#0369A1', teal: '#0D9488', tealGlow: 'rgba(13,148,136,0.1)',
+  skyBg: '#F0F9FF', white: '#FFFFFF', text: '#0F172A', textMuted: '#64748B', border: '#E2E8F0', navy: '#0F172A',
+};
+
+function useReveal(t = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [v, setV] = useState(false);
+  useEffect(() => { const el = ref.current; if (!el) return; const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setV(true); o.disconnect(); } }, { threshold: t }); o.observe(el); return () => o.disconnect(); }, [t]);
+  return { ref, v };
 }
 
 export function PlumbingProTemplate({ site }: { site: Site }) {
-  const [visible, setVisible] = useState<{ [key: string]: boolean }>({});
-  const contactRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observers: { [key: string]: IntersectionObserver } = {};
-
-    const createObserver = (id: string) => {
-      return new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setVisible((prev) => ({ ...prev, [id]: true }));
-            }
-          });
-        },
-        { threshold: 0.1 }
-      );
-    };
-
-    ['services', 'about', 'contact', 'footer'].forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        observers[id] = createObserver(id);
-        observers[id].observe(element);
-      }
-    });
-
-    return () => {
-      Object.values(observers).forEach((observer) => observer.disconnect());
-    };
-  }, []);
-
-  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    if (formData.get('website')) return;
-
-    try {
-      await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          site_id: site.id,
-          name: formData.get('name'),
-          email: formData.get('email'),
-          phone: formData.get('phone'),
-          message: formData.get('message'),
-          source: site.business_name,
-        }),
-      });
-      e.currentTarget.reset();
-      alert('Thank you for contacting us!');
-    } catch (error) {
-      console.error('Form submission error:', error);
-    }
-  };
-
-  const services: PlumbingServiceItem[] = site.site_config?.services || [
-    {
-      name: 'Emergency Repairs',
-      description: 'Available 24/7 for urgent plumbing issues',
-      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=500&h=400&fit=crop',
-    },
-    {
-      name: 'Pipe Installation',
-      description: 'Expert installation of pipes and fixtures',
-      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=400&fit=crop',
-    },
-    {
-      name: 'Drain Cleaning',
-      description: 'Professional drain clearing and maintenance',
-      image: 'https://images.unsplash.com/photo-1578898657397-9b26ac435db5?w=500&h=400&fit=crop',
-    },
-  ];
-
-  const stats: StatsItem[] = site.site_config?.about?.stats || [
-    { label: 'Years Experience', value: '20+' },
-    { label: 'Happy Clients', value: '5000+' },
-    { label: 'Projects Completed', value: '10k+' },
-  ];
+  const cfg = site.site_config;
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => { const h = () => setScrollY(window.scrollY); window.addEventListener('scroll', h, { passive: true }); return () => window.removeEventListener('scroll', h); }, []);
+  const navSolid = scrollY > 60;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Mobile Call Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-teal-600 text-white p-4 z-40 shadow-lg">
-        <a href={`tel:${site.site_config?.contact?.phone}`} className="block text-center font-semibold">
-          Call Now: {site.site_config?.contact?.phone || '(555) 123-4567'}
+    <div className="min-h-screen" style={{ background: C.white, fontFamily: "'Inter', system-ui, sans-serif", color: C.text }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+        style={{ background: navSolid ? 'rgba(255,255,255,0.95)' : 'transparent', backdropFilter: navSolid ? 'blur(16px)' : 'none', borderBottom: navSolid ? `1px solid ${C.border}` : '1px solid transparent' }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+          <span className="text-lg font-bold" style={{ color: navSolid ? C.blue : C.white }}>{cfg.footer.business_name}</span>
+          <div className="hidden md:flex items-center gap-8">
+            {['Services', 'About', 'Contact'].map(s => (<a key={s} href={`#${s.toLowerCase()}`} className="text-sm font-medium transition-colors" style={{ color: navSolid ? C.textMuted : 'rgba(255,255,255,0.8)' }}>{s}</a>))}
+            <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g, '')}`} className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all hover:scale-105" style={{ background: C.teal }}>{cfg.hero.cta_phone}</a>
+          </div>
+        </div>
+      </nav>
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden" style={{ background: C.teal }}>
+        <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g, '')}`} className="flex items-center justify-center gap-2 py-4 font-bold text-white">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+          Call Now — {cfg.hero.cta_phone}
         </a>
       </div>
 
-      {/* Desktop Header */}
-      <header className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-900">{site.business_name}</h1>
-          <nav className="flex gap-8">
-            <a href="#services" className="text-slate-600 hover:text-blue-700">Services</a>
-            <a href="#about" className="text-slate-600 hover:text-blue-700">About</a>
-            <a href="#contact" className="text-slate-600 hover:text-blue-700">Contact</a>
-          </nav>
+      {/* HERO */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={cfg.hero.background_image} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${C.blue}ee, ${C.blueLight}cc)` }} />
         </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=1200&h=800&fit=crop)',
-          }}
-        />
-        <div className="absolute inset-0 bg-blue-900/60" />
-
-        <div className="relative z-10 text-center text-white px-4">
-          <div className="mb-6 text-6xl">💧</div>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            {site.site_config?.hero?.headline || 'Expert Plumbing Solutions'}
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-2xl mx-auto">
-            {site.site_config?.hero?.subheadline || 'Professional service you can trust, 24/7'}
-          </p>
-          <button className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-8 rounded-lg transition">
-            Get a Free Quote
-          </button>
-        </div>
-
-        {/* Wave Divider SVG */}
-        <svg
-          className="absolute bottom-0 left-0 right-0 w-full h-24"
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-          style={{ fill: 'white' }}
-        >
-          <path d="M0,50 Q300,0 600,50 T1200,50 L1200,120 L0,120 Z" />
-        </svg>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16 text-blue-900">Our Services</h2>
-
-          <div className="space-y-12">
-            {services.map((service, idx) => (
-              <div
-                key={idx}
-                className={`flex flex-col ${
-                  idx % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                } gap-8 items-center transition-all duration-700 ${
-                  visible.services
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-10'
-                }`}
-              >
-                <div className="md:w-1/2">
-                  <img
-                    src={service.image}
-                    alt={service.name}
-                    className="w-full h-64 object-cover rounded-lg shadow-lg"
-                  />
-                </div>
-                <div className="md:w-1/2 relative pl-6">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600" />
-                  <h3 className="text-2xl font-bold text-blue-900 mb-3">{service.name}</h3>
-                  <p className="text-slate-600 mb-4">{service.description}</p>
-                  <button className="text-teal-600 font-semibold hover:text-teal-700">
-                    Learn More →
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-20 px-4 bg-sky-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16 text-blue-900">About Us</h2>
-
-          <div className="flex flex-col md:flex-row gap-12 items-center">
-            <div className="md:w-1/2 relative">
-              <div className="absolute -inset-4 bg-gradient-to-br from-blue-200 to-teal-200 rounded-full opacity-50 blur-xl" />
-              <img
-                src={site.site_config?.about?.image || 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=400&fit=crop'}
-                alt="About"
-                className="relative w-80 h-80 rounded-full object-cover shadow-xl mx-auto"
-              />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-20 w-full">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium tracking-widest uppercase mb-8 text-white" style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: C.teal }} />Available 24/7
             </div>
-
-            <div className={`md:w-1/2 transition-all duration-700 ${
-              visible.about ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
-            }`}>
-              <h3 className="text-2xl font-bold text-blue-900 mb-4">
-                {site.site_config?.about?.headline || 'Your Trusted Plumbing Partner'}
-              </h3>
-              <p className="text-slate-600 mb-6 leading-relaxed">
-                {site.site_config?.about?.body || 'With over 20 years of industry experience, we pride ourselves on delivering exceptional plumbing solutions with integrity and professionalism.'}
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                {stats.map((stat, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white px-4 py-2 rounded-full shadow-md border-l-4 border-teal-600"
-                  >
-                    <p className="text-teal-600 font-bold text-lg">{stat.value}</p>
-                    <p className="text-slate-600 text-sm">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[0.95] mb-8">{cfg.hero.headline}</h1>
+            <p className="text-lg md:text-xl text-blue-100 leading-relaxed mb-10 max-w-xl">{cfg.hero.subheadline}</p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g, '')}`} className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full text-base font-bold text-white transition-all hover:scale-105 shadow-lg" style={{ background: C.teal }}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                {cfg.hero.cta_text}
+              </a>
+              <a href="#contact" className="inline-flex items-center justify-center px-8 py-4 rounded-full text-base font-semibold text-white transition-all hover:bg-white/10" style={{ border: '1px solid rgba(255,255,255,0.3)' }}>Request Service</a>
             </div>
           </div>
         </div>
+        <div className="absolute bottom-0 left-0 right-0"><svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="w-full h-16 md:h-24"><path d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 L1440,100 L0,100 Z" fill={C.white} /></svg></div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-20 px-4 bg-blue-900">
-        <div ref={contactRef} className="max-w-2xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4 text-white">Get a Free Quote</h2>
-          <p className="text-center text-blue-100 mb-12">
-            Fill out the form below and we'll contact you within 2 hours.
-          </p>
+      {/* STATS */}
+      <Stats stats={cfg.about.stats} />
 
-          <form
-            onSubmit={handleContactSubmit}
-            className={`space-y-4 transition-all duration-700 ${
-              visible.contact ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-            }`}
-          >
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              required
-              className="w-full px-4 py-3 rounded-lg bg-white text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              required
-              className="w-full px-4 py-3 rounded-lg bg-white text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Phone Number"
-              required
-              className="w-full px-4 py-3 rounded-lg bg-white text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
-            />
-            <textarea
-              name="message"
-              placeholder="Describe your plumbing issue"
-              rows={5}
-              className="w-full px-4 py-3 rounded-lg bg-white text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
-            />
-
-            {/* Honeypot */}
-            <input
-              type="text"
-              name="website"
-              style={{ display: 'none' }}
-              tabIndex={-1}
-              autoComplete="off"
-            />
-
-            <button
-              type="submit"
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg transition duration-200"
-            >
-              Send Request
-            </button>
-          </form>
+      {/* SERVICES */}
+      <section id="services" className="py-28 md:py-36" style={{ background: C.skyBg }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <span className="text-xs font-bold tracking-[0.2em] uppercase mb-4 block" style={{ color: C.teal }}>Our Services</span>
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight" style={{ color: C.blue }}>How We Help</h2>
+          </div>
+          <div className="space-y-6">{cfg.services.map((svc, i) => <SvcCard key={i} svc={svc} i={i} />)}</div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="footer" className="bg-slate-900 text-white py-12 px-4">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-          {/* Business Info */}
-          <div>
-            <h4 className="font-bold text-lg mb-4">{site.business_name}</h4>
-            <p className="text-slate-400 mb-2">{site.site_config?.about?.body?.slice(0, 80)}...</p>
-            <p className="text-slate-400 flex items-center gap-2">
-              📍 {site.business_city}{site.business_state ? `, ${site.business_state}` : ''}
-            </p>
-          </div>
+      {/* ABOUT */}
+      <Abt cfg={cfg} />
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-bold text-lg mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-slate-400">
-              <li><a href="#services" className="hover:text-teal-400">Services</a></li>
-              <li><a href="#about" className="hover:text-teal-400">About</a></li>
-              <li><a href="#contact" className="hover:text-teal-400">Contact</a></li>
-              <li><a href="#" className="hover:text-teal-400">Privacy Policy</a></li>
-            </ul>
-          </div>
+      {/* CONTACT */}
+      <Cta cfg={cfg} siteId={site.id} />
 
-          {/* Contact Details */}
-          <div>
-            <h4 className="font-bold text-lg mb-4">Contact</h4>
-            <p className="text-slate-400 mb-2">
-              📞 <a href={`tel:${site.site_config?.contact?.phone}`} className="hover:text-teal-400">
-                {site.site_config?.contact?.phone || '(555) 123-4567'}
-              </a>
-            </p>
-            <p className="text-slate-400">
-              ✉️ <a href={`mailto:${site.site_config?.contact?.email}`} className="hover:text-teal-400">
-                {site.site_config?.contact?.email || 'info@example.com'}
-              </a>
-            </p>
-            <p className="text-slate-400 mt-4 text-sm">
-              Available 24/7 for emergencies
-            </p>
+      {/* FOOTER */}
+      <footer style={{ background: C.navy }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div><h3 className="text-xl font-bold text-white mb-3">{cfg.footer.business_name}</h3><p className="text-sm text-gray-400">{cfg.footer.tagline}</p></div>
+            <div><h4 className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">Links</h4><div className="space-y-3">{['Services','About','Contact'].map(l=>(<a key={l} href={`#${l.toLowerCase()}`} className="block text-sm text-gray-400 hover:text-white transition-colors">{l}</a>))}</div></div>
+            <div><h4 className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">Contact</h4><div className="space-y-3 text-sm text-gray-400"><a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="block hover:text-white">{cfg.contact.phone}</a><a href={`mailto:${cfg.contact.email}`} className="block hover:text-white">{cfg.contact.email}</a></div></div>
           </div>
-        </div>
-
-        <div className="border-t border-slate-700 mt-8 pt-8 text-center text-slate-400">
-          <p>&copy; 2024 {site.business_name}. All rights reserved.</p>
+          <div className="pt-8 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}><p className="text-xs text-gray-600">&copy; {new Date().getFullYear()} {cfg.footer.business_name}</p></div>
         </div>
       </footer>
+      <div className="h-16 md:hidden" />
     </div>
   );
+}
+
+function Stats({ stats }: { stats: {value:string;label:string}[] }) {
+  const { ref, v } = useReveal(0.3);
+  return (<div ref={ref} className={`max-w-5xl mx-auto px-6 -mt-12 relative z-20 transition-all duration-700 ${v ? 'opacity-100 translate-y-0':'opacity-0 translate-y-6'}`}><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{stats.slice(0,4).map((s,i)=>(<div key={i} className="text-center py-8 px-4 rounded-2xl shadow-lg" style={{background:C.white}}><div className="text-3xl font-extrabold mb-1" style={{color:C.teal}}>{s.value}</div><div className="text-xs font-medium uppercase tracking-wider" style={{color:C.textMuted}}>{s.label}</div></div>))}</div></div>);
+}
+
+function SvcCard({ svc, i }: { svc: {name:string;description:string;image?:string}; i: number }) {
+  const { ref, v } = useReveal(0.08);
+  return (<div ref={ref} className={`flex flex-col md:flex-row items-stretch rounded-2xl overflow-hidden shadow-md transition-all duration-700 hover:shadow-xl ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-8'}`} style={{background:C.white,transitionDelay:`${i*80}ms`}}>
+    <div className="w-full md:w-1/3 relative"><img src={svc.image||'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&q=80'} alt={svc.name} className="w-full h-48 md:h-full object-cover" /><div className="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{background:C.teal}}>{String(i+1).padStart(2,'0')}</div></div>
+    <div className="flex-1 p-6 md:p-8 flex flex-col justify-center" style={{borderLeft:`3px solid ${C.teal}`}}><h3 className="text-xl font-bold mb-3" style={{color:C.blue}}>{svc.name}</h3><p className="text-sm leading-relaxed mb-4" style={{color:C.textMuted}}>{svc.description}</p><a href="#contact" className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all" style={{color:C.teal}}>Schedule Service <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a></div>
+  </div>);
+}
+
+function Abt({ cfg }: { cfg: Site['site_config'] }) {
+  const { ref, v } = useReveal();
+  return (<section id="about" className="py-28 md:py-36" style={{background:C.white}}><div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-10'}`}><div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+    <div className="w-full lg:w-5/12"><div className="rounded-2xl overflow-hidden shadow-xl"><img src={cfg.about.image} alt="About" className="w-full aspect-[3/4] object-cover" /></div></div>
+    <div className="w-full lg:w-7/12"><span className="text-xs font-bold tracking-[0.2em] uppercase mb-6 block" style={{color:C.teal}}>About Us</span><h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-8" style={{color:C.blue}}>{cfg.about.headline}</h2><div className="space-y-5 mb-10">{cfg.about.body.split(/\n\n|\n/).filter(Boolean).map((p,i)=>(<p key={i} className="text-base leading-relaxed" style={{color:C.textMuted}}>{p}</p>))}</div><div className="flex flex-wrap gap-4">{['Licensed & Insured','24/7 Emergency','5-Star Rated'].map((b,i)=>(<span key={i} className="px-4 py-2 rounded-full text-sm font-medium" style={{background:C.tealGlow,color:C.teal}}>{b}</span>))}</div></div>
+  </div></div></section>);
+}
+
+function Cta({ cfg, siteId }: { cfg: Site['site_config']; siteId: string }) {
+  const { ref, v } = useReveal();
+  const [form, setForm] = useState({name:'',email:'',phone:'',service:'',message:'',website:''});
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault(); if(form.website) return; setSubmitting(true);
+    try { const res = await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({site_id:siteId,name:form.name,email:form.email,phone:form.phone,service_interest:form.service,message:form.message,website:form.website,source_page:'contact'})}); if(res.ok) setSubmitted(true); } catch {} finally { setSubmitting(false); }
+  }, [form, siteId]);
+  const iCls = "w-full px-5 py-4 rounded-xl text-sm transition-all outline-none focus:ring-2";
+  const iSty = {background:C.white,border:`1px solid ${C.border}`,color:C.text,'--tw-ring-color':C.teal} as React.CSSProperties;
+
+  return (<section id="contact" className="py-28 md:py-36 relative" style={{background:C.blue}}>
+    <div className="absolute top-0 left-0 right-0 -mt-1"><svg viewBox="0 0 1440 100" fill="none" preserveAspectRatio="none" className="w-full h-16 md:h-24"><path d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,20 1440,40 L1440,100 L0,100 Z" fill={C.blue} /></svg></div>
+    <div ref={ref} className={`max-w-4xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-10'}`}>
+      {submitted ? (<div className="text-center py-12"><h2 className="text-4xl font-extrabold text-white mb-4">Thank You!</h2><p className="text-blue-200">We&apos;ll call you back shortly. For emergencies, call <a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="underline text-white">{cfg.contact.phone}</a></p></div>) : (<>
+        <div className="text-center mb-12"><h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">{cfg.contact.headline}</h2>{cfg.contact.subtext && <p className="text-lg text-blue-200">{cfg.contact.subtext}</p>}</div>
+        <div className="rounded-2xl p-8 md:p-10 shadow-2xl" style={{background:C.skyBg}}>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <input type="text" name="website" value={form.website} onChange={e=>setForm({...form,website:e.target.value})} style={{position:'absolute',left:'-9999px'}} tabIndex={-1} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div><label className="block text-xs font-medium uppercase tracking-wider mb-2" style={{color:C.textMuted}}>Name *</label><input type="text" required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className={iCls} style={iSty} placeholder="John Smith" /></div>
+              <div><label className="block text-xs font-medium uppercase tracking-wider mb-2" style={{color:C.textMuted}}>Phone</label><input type="tel" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className={iCls} style={iSty} placeholder="(555) 123-4567" /></div>
+            </div>
+            <div><label className="block text-xs font-medium uppercase tracking-wider mb-2" style={{color:C.textMuted}}>Email</label><input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} className={iCls} style={iSty} placeholder="john@example.com" /></div>
+            {cfg.services.length > 0 && (<div><label className="block text-xs font-medium uppercase tracking-wider mb-2" style={{color:C.textMuted}}>Service</label><select value={form.service} onChange={e=>setForm({...form,service:e.target.value})} className={iCls} style={iSty}><option value="">Select...</option>{cfg.services.map((s,i)=><option key={i} value={s.name}>{s.name}</option>)}</select></div>)}
+            <div><label className="block text-xs font-medium uppercase tracking-wider mb-2" style={{color:C.textMuted}}>Message</label><textarea rows={4} value={form.message} onChange={e=>setForm({...form,message:e.target.value})} className={`${iCls} resize-none`} style={iSty} placeholder="Describe your issue..." /></div>
+            <button type="submit" disabled={submitting} className="w-full py-4 rounded-xl text-base font-bold text-white transition-all hover:shadow-lg disabled:opacity-50" style={{background:C.teal}}>{submitting?'Sending...':'Request Service'}</button>
+          </form>
+        </div>
+      </>)}
+    </div>
+  </section>);
 }
