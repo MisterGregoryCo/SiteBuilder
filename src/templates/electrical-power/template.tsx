@@ -1,325 +1,221 @@
 'use client';
 
 import { Site } from '@/lib/types/site-config';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+/* ═══════════════════════════════════════════════════════════
+   ELECTRICAL POWER — "Power Dark" Layout A variant
+   Near-black zinc with electric yellow, angular design,
+   bold industrial feel, dark glassmorphism
+   ═══════════════════════════════════════════════════════════ */
+
+const C = {
+  bg: '#09090B', zinc: '#18181B', zinc800: '#27272A', zinc700: '#3F3F46',
+  yellow: '#EAB308', yellowGlow: 'rgba(234,179,8,0.15)', yellowDim: 'rgba(234,179,8,0.08)',
+  white: '#FAFAFA', gray: '#A1A1AA', grayDark: '#71717A',
+  border: 'rgba(255,255,255,0.06)',
+};
+
+function useReveal(t=0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [v,setV] = useState(false);
+  useEffect(()=>{const el=ref.current;if(!el) return;const o=new IntersectionObserver(([e])=>{if(e.isIntersecting){setV(true);o.disconnect();}},{threshold:t});o.observe(el);return()=>o.disconnect();},[t]);
+  return {ref,v};
+}
 
 export function ElectricalPowerTemplate({ site }: { site: Site }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleSections((prev) => new Set(prev).add(entry.target.id));
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const elements = document.querySelectorAll('[data-observe]');
-    elements.forEach((el) => observerRef.current?.observe(el));
-
-    return () => observerRef.current?.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const LightningIcon = () => (
-    <svg
-      className="w-24 h-24 md:w-32 md:h-32 text-yellow-400"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-  );
-
-  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    // Honeypot check
-    if (formData.get('website')) return;
-
-    try {
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        body: JSON.stringify({
-          site_id: site.id,
-          name: formData.get('name'),
-          email: formData.get('email'),
-          phone: formData.get('phone'),
-          message: formData.get('message'),
-          source: 'electrical-power-template',
-        }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (response.ok) {
-        alert('Thank you! We will contact you soon.');
-        e.currentTarget.reset();
-      }
-    } catch (error) {
-      console.error('Form submission error:', error);
-    }
-  };
+  const cfg = site.site_config;
+  const [scrollY,setScrollY] = useState(0);
+  useEffect(()=>{const h=()=>setScrollY(window.scrollY);window.addEventListener('scroll',h,{passive:true});return()=>window.removeEventListener('scroll',h);},[]);
+  const navSolid = scrollY > 60;
 
   return (
-    <div className="bg-zinc-900 text-white">
-      {/* Sticky Mobile Call Bar */}
-      <div className="fixed bottom-0 left-0 right-0 md:hidden bg-yellow-400 text-zinc-900 p-4 z-50 font-bold">
-        <a href="tel:" className="block text-center">
-          📞 Call Now
+    <div className="min-h-screen" style={{ background: C.bg, fontFamily: "'Inter', system-ui, sans-serif", color: C.white }}>
+      {/* Yellow top accent */}
+      <div className="fixed top-0 left-0 right-0 h-1 z-[60]" style={{ background: C.yellow }} />
+
+      <nav className="fixed top-1 left-0 right-0 z-50 transition-all duration-500" style={{ background: navSolid ? `${C.bg}ee` : 'transparent', backdropFilter: navSolid ? 'blur(16px)' : 'none', borderBottom: navSolid ? `1px solid ${C.border}` : '1px solid transparent' }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+          <span className="text-lg font-black tracking-tight uppercase" style={{ color: C.yellow }}>{cfg.footer.business_name}</span>
+          <div className="hidden md:flex items-center gap-8">
+            {['Services','About','Contact'].map(s=>(<a key={s} href={`#${s.toLowerCase()}`} className="text-sm font-medium transition-colors" style={{ color: C.gray }}>{s}</a>))}
+            <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g,'')}`} className="px-5 py-2.5 text-sm font-bold transition-all hover:scale-105" style={{ background: C.yellow, color: C.bg }}>{cfg.hero.cta_phone}</a>
+          </div>
+        </div>
+      </nav>
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden" style={{ background: C.yellow }}>
+        <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g,'')}`} className="flex items-center justify-center gap-2 py-4 font-black" style={{ color: C.bg }}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+          CALL NOW — {cfg.hero.cta_phone}
         </a>
       </div>
 
-      {/* Desktop Header */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          scrolled ? 'bg-zinc-950 shadow-lg' : 'bg-transparent'
-        }`}
-      >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-yellow-400 tracking-wider">
-            {site.site_config?.footer?.business_name || 'POWER'}
-          </div>
-          <div className="hidden md:flex gap-8 text-sm font-semibold">
-            <a href="#services" className="hover:text-yellow-400 transition">
-              SERVICES
-            </a>
-            <a href="#about" className="hover:text-yellow-400 transition">
-              ABOUT
-            </a>
-            <a href="#contact" className="hover:text-yellow-400 transition">
-              CONTACT
-            </a>
-          </div>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-0 md:pt-40 md:pb-0 bg-zinc-900 overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-transparent to-transparent" />
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100" height="100" fill="url(#grid)" />
-          </svg>
+      {/* HERO — Dark angular */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={cfg.hero.background_image} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${C.bg}ee, ${C.zinc}dd)` }} />
         </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-yellow-400 uppercase">
-              Power Your
-              <br />
-              Future
-            </h1>
-            <p className="text-lg md:text-xl text-zinc-400 mb-8 max-w-lg">
-              {site.site_config?.hero?.subheadline || 'Industrial solutions for modern challenges'}
-            </p>
-            <button className="bg-yellow-400 text-zinc-900 font-bold px-8 py-4 text-lg hover:bg-yellow-300 transition-all hover:shadow-lg hover:shadow-yellow-400/50">
-              GET STARTED
-            </button>
-          </div>
-
-          <div className="flex-1 flex justify-center relative">
-            <div className="relative z-10">
-              <LightningIcon />
+        {/* Lightning bolt decorative */}
+        <div className="absolute top-1/4 right-10 opacity-5">
+          <svg className="w-64 h-64" fill={C.yellow} viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z"/></svg>
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-20 w-full">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-xs font-bold tracking-[0.2em] uppercase" style={{ background: C.yellowDim, color: C.yellow, border: `1px solid ${C.yellowGlow}` }}>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 10 10-12h-9l1-10z"/></svg>
+              {site.business_city}{site.business_state ? `, ${site.business_state}` : ''}
             </div>
-            <div className="absolute inset-0 bg-gradient-radial from-yellow-400/20 to-transparent rounded-full blur-3xl" />
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[0.95] mb-8 uppercase">{cfg.hero.headline}</h1>
+            <p className="text-lg md:text-xl leading-relaxed mb-10 max-w-xl" style={{ color: C.gray }}>{cfg.hero.subheadline}</p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <a href={`tel:${cfg.hero.cta_phone.replace(/\D/g,'')}`} className="inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-black uppercase tracking-wider transition-all hover:scale-105" style={{ background: C.yellow, color: C.bg }}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                {cfg.hero.cta_text}
+              </a>
+              <a href="#contact" className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold uppercase tracking-wider transition-all hover:bg-white/5" style={{ border: `1px solid ${C.border}`, color: C.white }}>Get Estimate</a>
+            </div>
           </div>
         </div>
-
-        <div
-          className="relative h-32 md:h-48 w-full mt-8"
-          style={{
-            clipPath: 'polygon(0 0, 100% 0, 100% 70%, 0 100%)',
-            backgroundImage: `linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%)`,
-          }}
-        />
+        {/* Angular bottom cut */}
+        <div className="absolute bottom-0 left-0 right-0"><svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-12"><path d="M0,60 L1440,20 L1440,60 Z" fill={C.bg}/></svg></div>
       </section>
 
-      {/* Services Section */}
-      <section
-        id="services"
-        data-observe
-        className={`bg-zinc-900 py-16 md:py-24 transition-opacity duration-700 ${
-          visibleSections.has('services') ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-16 text-yellow-400 uppercase">
-            Our Services
-          </h2>
+      {/* STATS */}
+      <ElecStats stats={cfg.about.stats} />
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {[
-              { num: '01', title: 'Power Systems', desc: 'Advanced electrical grid solutions' },
-              { num: '02', title: 'Infrastructure', desc: 'Industrial power infrastructure design' },
-              { num: '03', title: 'Maintenance', desc: 'Preventive maintenance programs' },
-              { num: '04', title: 'Automation', desc: 'Smart grid automation technology' },
-            ].map((service, idx) => (
-              <div
-                key={idx}
-                className="group relative bg-zinc-800 border-l-4 border-yellow-400 p-8 hover:border-yellow-300 hover:shadow-lg hover:shadow-yellow-400/20 transition-all duration-300"
-              >
-                <div className="absolute -top-6 left-8 bg-yellow-400 text-zinc-900 w-12 h-12 flex items-center justify-center font-black text-lg group-hover:scale-110 transition-transform">
-                  {service.num}
-                </div>
-                <h3 className="text-2xl font-bold mt-4 mb-3 uppercase tracking-wide">{service.title}</h3>
-                <p className="text-zinc-400">{service.desc}</p>
-              </div>
-            ))}
+      {/* SERVICES — Grid with yellow left borders */}
+      <section id="services" className="py-28 md:py-36" style={{ background: C.bg }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <span className="text-xs font-bold tracking-[0.2em] uppercase mb-4 block" style={{ color: C.yellow }}>Services</span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight uppercase">What We Do</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {cfg.services.map((svc,i)=>(<ElecCard key={i} svc={svc} i={i} />))}
           </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section
-        id="about"
-        data-observe
-        className={`bg-black py-16 md:py-24 transition-opacity duration-700 ${
-          visibleSections.has('about') ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-16 text-yellow-400 uppercase">
-            Why Choose Us
-          </h2>
+      {/* ABOUT */}
+      <ElecAbout cfg={cfg} />
 
-          {/* Timeline Stats */}
-          <div className="mb-16 flex flex-col md:flex-row justify-between items-center gap-8 relative">
-            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-px border-t border-dashed border-yellow-400/30" />
+      {/* CONTACT */}
+      <ElecContact cfg={cfg} siteId={site.id} />
 
-            {[
-              { stat: '25+', label: 'Years Experience' },
-              { stat: '500+', label: 'Projects Delivered' },
-              { stat: '98%', label: 'Uptime Guarantee' },
-              { stat: '24/7', label: 'Support Team' },
-            ].map((item, idx) => (
-              <div key={idx} className="relative text-center z-10 bg-black px-6">
-                <div className="w-4 h-4 bg-yellow-400 rounded-full absolute -left-2 top-1/2 -translate-y-1/2 md:relative md:left-auto md:top-auto md:-translate-y-0 md:mx-auto md:mb-4" />
-                <div className="text-3xl md:text-4xl font-black text-yellow-400">{item.stat}</div>
-                <div className="text-zinc-400 text-sm md:text-base mt-2">{item.label}</div>
-              </div>
-            ))}
+      {/* FOOTER */}
+      <footer><div className="h-1" style={{ background: C.yellow }} />
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16" style={{ background: C.bg }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div><h3 className="text-xl font-black uppercase mb-3" style={{ color: C.yellow }}>{cfg.footer.business_name}</h3><p className="text-sm" style={{ color: C.grayDark }}>{cfg.footer.tagline}</p></div>
+            <div><h4 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: C.grayDark }}>Links</h4><div className="space-y-3">{['Services','About','Contact'].map(l=>(<a key={l} href={`#${l.toLowerCase()}`} className="block text-sm hover:text-white transition-colors" style={{ color: C.grayDark }}>{l}</a>))}</div></div>
+            <div><h4 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: C.grayDark }}>Contact</h4><div className="space-y-3 text-sm" style={{ color: C.grayDark }}><a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="block hover:text-white">{cfg.contact.phone}</a><a href={`mailto:${cfg.contact.email}`} className="block hover:text-white">{cfg.contact.email}</a></div></div>
           </div>
-
-          {/* About Card with Corner Accents */}
-          <div className="relative bg-zinc-900 p-12 border-2 border-zinc-800">
-            {/* Yellow corner brackets */}
-            <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-yellow-400" />
-            <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-yellow-400" />
-            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-yellow-400" />
-            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-yellow-400" />
-
-            <p className="text-lg text-zinc-300 leading-relaxed">
-              {site.site_config?.meta?.description ||
-                'We deliver industrial-grade electrical solutions with cutting-edge technology and unmatched expertise. Our commitment to excellence drives innovation in power systems worldwide.'}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section
-        id="contact"
-        data-observe
-        className={`bg-zinc-800 py-16 md:py-24 transition-opacity duration-700 ${
-          visibleSections.has('contact') ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 text-yellow-400 uppercase">
-            Get In Touch
-          </h2>
-          <p className="text-zinc-400 mb-12">
-            {site.site_config?.hero?.cta_text || 'Ready to power your project? Contact our team today.'}
-          </p>
-
-          <form onSubmit={handleContactSubmit} className="space-y-8">
-            {/* Honeypot */}
-            <input type="text" name="website" style={{ display: 'none' }} tabIndex={-1} autoComplete="off" />
-
-            <div>
-              <input
-                type="text"
-                name="name"
-                placeholder="YOUR NAME"
-                required
-                className="w-full bg-transparent text-white placeholder-zinc-500 border-b-2 border-zinc-700 focus:border-yellow-400 focus:outline-none pb-3 transition-colors font-semibold"
-              />
-            </div>
-
-            <div>
-              <input
-                type="email"
-                name="email"
-                placeholder="YOUR EMAIL"
-                required
-                className="w-full bg-transparent text-white placeholder-zinc-500 border-b-2 border-zinc-700 focus:border-yellow-400 focus:outline-none pb-3 transition-colors font-semibold"
-              />
-            </div>
-
-            <div>
-              <input
-                type="tel"
-                name="phone"
-                placeholder="YOUR PHONE"
-                className="w-full bg-transparent text-white placeholder-zinc-500 border-b-2 border-zinc-700 focus:border-yellow-400 focus:outline-none pb-3 transition-colors font-semibold"
-              />
-            </div>
-
-            <div>
-              <textarea
-                name="message"
-                placeholder="YOUR MESSAGE"
-                rows={4}
-                required
-                className="w-full bg-transparent text-white placeholder-zinc-500 border-b-2 border-zinc-700 focus:border-yellow-400 focus:outline-none pb-3 transition-colors font-semibold resize-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-yellow-400 text-zinc-900 font-black py-4 text-lg uppercase tracking-wider hover:bg-yellow-300 transition-all hover:shadow-lg hover:shadow-yellow-400/50"
-            >
-              Send Message
-            </button>
-          </form>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-zinc-950 border-t-4 border-yellow-400 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-yellow-400 font-bold uppercase tracking-wider">
-            {site.site_config?.footer?.business_name || 'POWER'}
-          </div>
-          <div className="text-zinc-500 text-sm text-center md:text-right">
-            © 2026. {site.site_config?.footer?.business_name || 'Power Industries'}. All rights reserved.
-          </div>
+          <div className="pt-8 text-center" style={{ borderTop: `1px solid ${C.border}` }}><p className="text-xs" style={{ color: C.zinc700 }}>&copy; {new Date().getFullYear()} {cfg.footer.business_name}</p></div>
         </div>
       </footer>
-
-      {/* Mobile bottom padding for sticky bar */}
-      <div className="h-16 md:h-0" />
+      <div className="h-16 md:hidden" />
     </div>
   );
+}
+
+function ElecStats({ stats }: { stats: {value:string;label:string}[] }) {
+  const { ref, v } = useReveal(0.3);
+  return (<div ref={ref} className={`py-16 transition-all duration-700 ${v?'opacity-100':'opacity-0'}`} style={{ background: C.zinc }}>
+    <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+      {stats.slice(0,4).map((s,i)=>(<div key={i} className="text-center"><div className="text-3xl md:text-4xl font-black mb-2" style={{ color: C.yellow }}>{s.value}</div><div className="text-xs font-medium uppercase tracking-widest" style={{ color: C.grayDark }}>{s.label}</div></div>))}
+    </div>
+  </div>);
+}
+
+function ElecCard({ svc, i }: { svc: {name:string;description:string;image?:string}; i: number }) {
+  const { ref, v } = useReveal(0.08);
+  return (<div ref={ref} className={`rounded-xl overflow-hidden transition-all duration-700 hover:shadow-lg ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-8'}`}
+    style={{ background: C.zinc, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.yellow}`, transitionDelay: `${i*80}ms` }}>
+    <div className="flex flex-col sm:flex-row">
+      <div className="w-full sm:w-1/3"><img src={svc.image || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80'} alt={svc.name} className="w-full h-40 sm:h-full object-cover" /></div>
+      <div className="flex-1 p-6">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-xs font-black" style={{ color: C.yellow }}>{String(i+1).padStart(2,'0')}</span>
+          <h3 className="text-lg font-bold">{svc.name}</h3>
+        </div>
+        <p className="text-sm leading-relaxed mb-4" style={{ color: C.gray }}>{svc.description}</p>
+        <a href="#contact" className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider transition-all hover:gap-3" style={{ color: C.yellow }}>Get Quote <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+      </div>
+    </div>
+  </div>);
+}
+
+function ElecAbout({ cfg }: { cfg: Site['site_config'] }) {
+  const { ref, v } = useReveal();
+  return (<section id="about" className="py-28 md:py-36" style={{ background: C.zinc }}>
+    <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-10'}`}>
+      <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+        <div className="w-full lg:w-5/12"><div className="overflow-hidden"><img src={cfg.about.image} alt="About" className="w-full aspect-[3/4] object-cover" /></div></div>
+        <div className="w-full lg:w-7/12">
+          <span className="text-xs font-black tracking-[0.2em] uppercase mb-6 block" style={{ color: C.yellow }}>About Us</span>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-8 uppercase">{cfg.about.headline}</h2>
+          <div className="space-y-5 mb-10">{cfg.about.body.split(/\n\n|\n/).filter(Boolean).map((p,i)=>(<p key={i} className="text-base leading-relaxed" style={{ color: C.gray }}>{p}</p>))}</div>
+          <div className="flex flex-wrap gap-4">
+            {['Licensed Electrician','Code Compliant','Safety First'].map((b,i)=>(
+              <span key={i} className="px-4 py-2 text-sm font-bold uppercase tracking-wider" style={{ background: C.yellowDim, color: C.yellow, border: `1px solid ${C.yellowGlow}` }}>{b}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>);
+}
+
+function ElecContact({ cfg, siteId }: { cfg: Site['site_config']; siteId: string }) {
+  const { ref, v } = useReveal();
+  const [form,setForm]=useState({name:'',email:'',phone:'',service:'',message:'',website:''});
+  const [submitted,setSubmitted]=useState(false);
+  const [submitting,setSubmitting]=useState(false);
+  const handleSubmit=useCallback(async(e: React.FormEvent)=>{
+    e.preventDefault();if(form.website) return;setSubmitting(true);
+    try{const res=await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({site_id:siteId,name:form.name,email:form.email,phone:form.phone,service_interest:form.service,message:form.message,website:form.website,source_page:'contact'})});if(res.ok) setSubmitted(true);}catch{}finally{setSubmitting(false);}
+  },[form,siteId]);
+  const iCls="w-full px-5 py-4 text-sm transition-all outline-none";
+  const iSty={background:C.zinc800,border:`1px solid ${C.border}`,color:C.white} as React.CSSProperties;
+
+  return (<section id="contact" className="py-28 md:py-36" style={{ background: C.bg }}>
+    <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-10'}`}>
+      {submitted ? (
+        <div className="text-center py-12"><h2 className="text-4xl font-black uppercase mb-4" style={{ color: C.yellow }}>Thank You</h2><p style={{ color: C.gray }}>We&apos;ll be in touch. Call <a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="underline" style={{ color: C.yellow }}>{cfg.contact.phone}</a> for immediate help.</p></div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+          <div className="flex flex-col justify-center">
+            <span className="text-xs font-black tracking-[0.2em] uppercase mb-6 block" style={{ color: C.yellow }}>Contact</span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6 uppercase">{cfg.contact.headline}</h2>
+            {cfg.contact.subtext && <p className="text-lg mb-12" style={{ color: C.gray }}>{cfg.contact.subtext}</p>}
+            <div className="space-y-6">
+              <a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="flex items-center gap-5 group">
+                <div className="w-14 h-14 flex items-center justify-center" style={{ background: C.yellowDim, border: `1px solid ${C.yellowGlow}` }}><svg className="w-6 h-6" style={{ color: C.yellow }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg></div>
+                <div><p className="text-xs uppercase tracking-wider" style={{ color: C.grayDark }}>Phone</p><p className="text-lg font-bold group-hover:underline">{cfg.contact.phone}</p></div>
+              </a>
+              <a href={`mailto:${cfg.contact.email}`} className="flex items-center gap-5 group">
+                <div className="w-14 h-14 flex items-center justify-center" style={{ background: C.yellowDim, border: `1px solid ${C.yellowGlow}` }}><svg className="w-6 h-6" style={{ color: C.yellow }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
+                <div><p className="text-xs uppercase tracking-wider" style={{ color: C.grayDark }}>Email</p><p className="text-lg font-bold group-hover:underline">{cfg.contact.email}</p></div>
+              </a>
+            </div>
+          </div>
+          <div className="rounded-xl p-8 md:p-10" style={{ background: C.zinc, border: `1px solid ${C.border}` }}>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <input type="text" name="website" value={form.website} onChange={e=>setForm({...form,website:e.target.value})} style={{position:'absolute',left:'-9999px'}} tabIndex={-1} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div><label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{color:C.grayDark}}>Name *</label><input type="text" required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className={iCls} style={iSty} placeholder="John Smith" /></div>
+                <div><label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{color:C.grayDark}}>Phone</label><input type="tel" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className={iCls} style={iSty} placeholder="(555) 123-4567" /></div>
+              </div>
+              <div><label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{color:C.grayDark}}>Email</label><input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} className={iCls} style={iSty} placeholder="john@example.com" /></div>
+              {cfg.services.length>0&&(<div><label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{color:C.grayDark}}>Service</label><select value={form.service} onChange={e=>setForm({...form,service:e.target.value})} className={iCls} style={iSty}><option value="">Select...</option>{cfg.services.map((s,i)=><option key={i} value={s.name}>{s.name}</option>)}</select></div>)}
+              <div><label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{color:C.grayDark}}>Message</label><textarea rows={4} value={form.message} onChange={e=>setForm({...form,message:e.target.value})} className={`${iCls} resize-none`} style={iSty} placeholder="Describe your project..." /></div>
+              <button type="submit" disabled={submitting} className="w-full py-4 text-base font-black uppercase tracking-wider transition-all hover:scale-[1.02] disabled:opacity-50" style={{background:C.yellow,color:C.bg}}>{submitting?'Sending...':'Request Service'}</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>);
 }
