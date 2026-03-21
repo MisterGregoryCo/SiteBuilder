@@ -20,7 +20,7 @@ function useReveal(t=0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [v,setV] = useState(false);
   useEffect(()=>{const el=ref.current;if(!el) return;const o=new IntersectionObserver(([e])=>{if(e.isIntersecting){setV(true);o.disconnect();}},{threshold:t});o.observe(el);return()=>o.disconnect();},[t]);
-  return {ref, v, anim: { opacity: v ? 1 : 0, transform: v ? 'translateY(0)' : 'translateY(20px)', transition: 'opacity 0.8s ease, transform 0.8s ease' } as React.CSSProperties };
+  return { ref, v };
 }
 
 export function LandscapingNaturalTemplate({ site }: { site: Site }) {
@@ -114,8 +114,8 @@ export function LandscapingNaturalTemplate({ site }: { site: Site }) {
 }
 
 function LandStats({ stats }: { stats: {value:string;label:string}[] }) {
-  const { ref, v, anim } = useReveal(0.3);
-  return (<div ref={ref} style={anim} className={`max-w-5xl mx-auto px-6 -mt-10 relative z-20 transition-all duration-700 `}>
+  const { ref, v } = useReveal(0.3);
+  return (<div ref={ref} className={`max-w-5xl mx-auto px-6 -mt-10 relative z-20 transition-all duration-700 `}>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {stats.slice(0,4).map((s,i)=>(<div key={i} className="text-center py-8 px-4 rounded-2xl shadow-md" style={{ background: C.white }}>
         <div className="text-3xl font-bold mb-1" style={{ color: C.green, fontFamily: 'Georgia, serif' }}>{s.value}</div>
@@ -126,8 +126,8 @@ function LandStats({ stats }: { stats: {value:string;label:string}[] }) {
 }
 
 function LandCard({ svc, i }: { svc: {name:string;description:string;image?:string}; i: number }) {
-  const { ref, v, anim } = useReveal(0.08);
-  return (<div ref={ref} className={`group rounded-2xl overflow-hidden shadow-md transition-all duration-700 hover:shadow-xl hover:-translate-y-1 `} style={{...anim,  background: C.white, transitionDelay: `${i*80}ms` }}>
+  const { ref, v } = useReveal(0.08);
+  return (<div ref={ref} className={`group rounded-2xl overflow-hidden shadow-md transition-all duration-700 hover:shadow-xl hover:-translate-y-1 `} style={{background: C.white, transitionDelay: `${i*80}ms` }}>
     <div className="relative h-52 overflow-hidden">
       <img src={svc.image || 'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=600&q=80'} alt={svc.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -143,9 +143,9 @@ function LandCard({ svc, i }: { svc: {name:string;description:string;image?:stri
 }
 
 function LandAbout({ cfg }: { cfg: Site['site_config'] }) {
-  const { ref, v, anim } = useReveal();
+  const { ref, v } = useReveal();
   return (<section id="about" className="py-28 md:py-36" style={{ background: C.cream }}>
-    <div ref={ref} style={anim} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
+    <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
       <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
         <div className="w-full lg:w-5/12"><div className="rounded-2xl overflow-hidden shadow-xl"><img src={cfg.about.image} alt="About" className="w-full aspect-[3/4] object-cover" /></div></div>
         <div className="w-full lg:w-7/12">
@@ -164,7 +164,7 @@ function LandAbout({ cfg }: { cfg: Site['site_config'] }) {
 }
 
 function LandContact({ cfg, siteId }: { cfg: Site['site_config']; siteId: string }) {
-  const { ref, v, anim } = useReveal();
+  const { ref, v } = useReveal();
   const [form,setForm]=useState({name:'',email:'',phone:'',service:'',message:'',website:''});
   const [submitted,setSubmitted]=useState(false);
   const [submitting,setSubmitting]=useState(false);
@@ -178,7 +178,7 @@ function LandContact({ cfg, siteId }: { cfg: Site['site_config']; siteId: string
   return (<section id="contact" className="py-28 md:py-36 relative" style={{ background: C.green }}>
     {/* Organic top curve */}
     <div className="absolute top-0 left-0 right-0 -mt-1"><svg viewBox="0 0 1440 60" preserveAspectRatio="none" className="w-full h-12 md:h-16"><path d="M0,0 C360,50 720,10 1080,40 C1260,55 1380,20 1440,35 L1440,60 L0,60 Z" fill={C.green}/></svg></div>
-    <div ref={ref} style={anim} className={`max-w-4xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
+    <div ref={ref} className={`max-w-4xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
       {submitted ? (
         <div className="text-center py-12"><h2 className="text-4xl font-bold text-white mb-4" style={{ fontFamily: 'Georgia, serif' }}>Thank You!</h2><p className="text-green-100">We&apos;ll be in touch shortly. Call <a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="underline text-white">{cfg.contact.phone}</a> for immediate help.</p></div>
       ) : (<>

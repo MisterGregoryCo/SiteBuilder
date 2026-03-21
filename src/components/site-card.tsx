@@ -45,6 +45,7 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
   const rendererDomain = process.env.NEXT_PUBLIC_RENDERER_DOMAIN || 'prosetpages.com';
   const heroImage = site.site_config?.hero?.background_image;
   const accentColor = INDUSTRY_COLORS[site.industry] || '#E8762D';
+  const siteUrl = `/render/${site.slug}`;
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -104,7 +105,7 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
             </div>
           )}
 
-          {/* Status badge on image */}
+          {/* Status badge */}
           <div className="absolute top-3 left-3">
             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm"
               style={{ background: status.bg, color: status.text, border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -112,7 +113,7 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
             </span>
           </div>
 
-          {/* Industry accent tag */}
+          {/* Industry tag */}
           <div className="absolute top-3 right-3">
             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm capitalize"
               style={{ background: `${accentColor}20`, color: accentColor, border: `1px solid ${accentColor}30` }}>
@@ -120,7 +121,7 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
             </span>
           </div>
 
-          {/* Business name overlay on image */}
+          {/* Business name overlay */}
           <div className="absolute bottom-3 left-3 right-3">
             <h3 className="font-bold text-white text-lg leading-tight drop-shadow-lg">{site.business_name}</h3>
             <p className="text-xs text-gray-300 mt-0.5">
@@ -138,11 +139,10 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
           <span style={{ color: accentColor }}>{site.submission_count} lead{site.submission_count !== 1 ? 's' : ''}</span>
         </div>
 
-        {site.status === 'published' && (
-          <p className="text-[11px] mb-3 break-all font-mono" style={{ color: '#4B5563' }}>
-            {site.slug}.{rendererDomain}
-          </p>
-        )}
+        {/* URL display */}
+        <p className="text-[11px] mb-3 break-all font-mono" style={{ color: '#4B5563' }}>
+          {site.slug}.{rendererDomain}
+        </p>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -151,13 +151,14 @@ export function SiteCard({ site, onDelete }: SiteCardProps) {
             style={{ background: `${accentColor}15`, color: accentColor }}>
             Preview
           </Link>
-          {site.status === 'published' && (
-            <a href={`https://${site.slug}.${rendererDomain}`} target="_blank" rel="noopener noreferrer"
-              className="flex-1 text-center py-2.5 text-sm font-semibold rounded-lg transition-all hover:opacity-80"
-              style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22C55E' }}>
-              View Live
-            </a>
-          )}
+          <a href={siteUrl} target="_blank" rel="noopener noreferrer"
+            className="flex-1 text-center py-2.5 text-sm font-semibold rounded-lg transition-all hover:opacity-80 flex items-center justify-center gap-1.5"
+            style={{ background: 'rgba(255,255,255,0.05)', color: '#9CA3AF', border: '1px solid #2A2A2A' }}>
+            View Site
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
           <button onClick={() => setShowConfirm(true)} title="Delete site"
             className="p-2.5 rounded-lg transition-colors hover:bg-red-500/10">
             <svg className="w-4 h-4" style={{ color: '#4B5563' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -21,7 +21,7 @@ function useReveal(t=0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [v,setV] = useState(false);
   useEffect(()=>{const el=ref.current;if(!el) return;const o=new IntersectionObserver(([e])=>{if(e.isIntersecting){setV(true);o.disconnect();}},{threshold:t});o.observe(el);return()=>o.disconnect();},[t]);
-  return {ref, v, anim: { opacity: v ? 1 : 0, transform: v ? 'translateY(0)' : 'translateY(20px)', transition: 'opacity 0.8s ease, transform 0.8s ease' } as React.CSSProperties };
+  return { ref, v };
 }
 
 export function ElectricalPowerTemplate({ site }: { site: Site }) {
@@ -122,8 +122,8 @@ export function ElectricalPowerTemplate({ site }: { site: Site }) {
 }
 
 function ElecStats({ stats }: { stats: {value:string;label:string}[] }) {
-  const { ref, v, anim } = useReveal(0.3);
-  return (<div ref={ref} className={`py-16 transition-all duration-700 `} style={{...anim,  background: C.zinc }}>
+  const { ref, v } = useReveal(0.3);
+  return (<div ref={ref} className={`py-16 transition-all duration-700 `} style={{background: C.zinc }}>
     <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
       {stats.slice(0,4).map((s,i)=>(<div key={i} className="text-center"><div className="text-3xl md:text-4xl font-black mb-2" style={{ color: C.yellow }}>{s.value}</div><div className="text-xs font-medium uppercase tracking-widest" style={{ color: C.grayDark }}>{s.label}</div></div>))}
     </div>
@@ -131,8 +131,8 @@ function ElecStats({ stats }: { stats: {value:string;label:string}[] }) {
 }
 
 function ElecCard({ svc, i }: { svc: {name:string;description:string;image?:string}; i: number }) {
-  const { ref, v, anim } = useReveal(0.08);
-  return (<div ref={ref} className={`rounded-xl overflow-hidden transition-all duration-700 hover:shadow-lg `} style={{...anim,  background: C.zinc, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.yellow}`, transitionDelay: `${i*80}ms` }}>
+  const { ref, v } = useReveal(0.08);
+  return (<div ref={ref} className={`rounded-xl overflow-hidden transition-all duration-700 hover:shadow-lg `} style={{background: C.zinc, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.yellow}`, transitionDelay: `${i*80}ms` }}>
     <div className="flex flex-col sm:flex-row">
       <div className="w-full sm:w-1/3"><img src={svc.image || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80'} alt={svc.name} className="w-full h-40 sm:h-full object-cover" /></div>
       <div className="flex-1 p-6">
@@ -148,9 +148,9 @@ function ElecCard({ svc, i }: { svc: {name:string;description:string;image?:stri
 }
 
 function ElecAbout({ cfg }: { cfg: Site['site_config'] }) {
-  const { ref, v, anim } = useReveal();
+  const { ref, v } = useReveal();
   return (<section id="about" className="py-28 md:py-36" style={{ background: C.zinc }}>
-    <div ref={ref} style={anim} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
+    <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
       <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
         <div className="w-full lg:w-5/12"><div className="overflow-hidden"><img src={cfg.about.image} alt="About" className="w-full aspect-[3/4] object-cover" /></div></div>
         <div className="w-full lg:w-7/12">
@@ -169,7 +169,7 @@ function ElecAbout({ cfg }: { cfg: Site['site_config'] }) {
 }
 
 function ElecContact({ cfg, siteId }: { cfg: Site['site_config']; siteId: string }) {
-  const { ref, v, anim } = useReveal();
+  const { ref, v } = useReveal();
   const [form,setForm]=useState({name:'',email:'',phone:'',service:'',message:'',website:''});
   const [submitted,setSubmitted]=useState(false);
   const [submitting,setSubmitting]=useState(false);
@@ -181,7 +181,7 @@ function ElecContact({ cfg, siteId }: { cfg: Site['site_config']; siteId: string
   const iSty={background:C.zinc800,border:`1px solid ${C.border}`,color:C.white} as React.CSSProperties;
 
   return (<section id="contact" className="py-28 md:py-36" style={{ background: C.bg }}>
-    <div ref={ref} style={anim} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
+    <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
       {submitted ? (
         <div className="text-center py-12"><h2 className="text-4xl font-black uppercase mb-4" style={{ color: C.yellow }}>Thank You</h2><p style={{ color: C.gray }}>We&apos;ll be in touch. Call <a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="underline" style={{ color: C.yellow }}>{cfg.contact.phone}</a> for immediate help.</p></div>
       ) : (
