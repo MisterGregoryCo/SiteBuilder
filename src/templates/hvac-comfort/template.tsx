@@ -21,7 +21,7 @@ function useReveal(t = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [v, setV] = useState(false);
   useEffect(() => { const el = ref.current; if (!el) return; const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setV(true); o.disconnect(); } }, { threshold: t }); o.observe(el); return () => o.disconnect(); }, [t]);
-  return { ref, v };
+  return { ref, v, anim: { opacity: v ? 1 : 0, transform: v ? 'translateY(0)' : 'translateY(20px)', transition: 'opacity 0.8s ease, transform 0.8s ease' } as React.CSSProperties };
 }
 
 export function HvacComfortTemplate({ site }: { site: Site }) {
@@ -120,8 +120,8 @@ export function HvacComfortTemplate({ site }: { site: Site }) {
 }
 
 function HvacStats({ stats }: { stats: {value:string;label:string}[] }) {
-  const { ref, v } = useReveal(0.3);
-  return (<div ref={ref} className={`max-w-5xl mx-auto px-6 -mt-16 relative z-20 transition-all duration-700 ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-6'}`}>
+  const { ref, v, anim } = useReveal(0.3);
+  return (<div ref={ref} style={anim} className={`max-w-5xl mx-auto px-6 -mt-16 relative z-20 transition-all duration-700 `}>
     <div className="rounded-2xl overflow-hidden shadow-2xl" style={{ background: C.white }}>
       <div className="grid grid-cols-2 md:grid-cols-4">
         {stats.slice(0,4).map((s,i) => (
@@ -136,11 +136,10 @@ function HvacStats({ stats }: { stats: {value:string;label:string}[] }) {
 }
 
 function HvacServiceBand({ svc, i }: { svc: {name:string;description:string;image?:string}; i: number }) {
-  const { ref, v } = useReveal(0.08);
+  const { ref, v, anim } = useReveal(0.08);
   const isEven = i % 2 === 0;
   return (
-    <div ref={ref} className={`relative rounded-2xl overflow-hidden transition-all duration-700 hover:shadow-xl ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-8'}`}
-      style={{ background: isEven ? C.white : C.offWhite, border: `1px solid ${C.border}`, transitionDelay: `${i*80}ms` }}>
+    <div ref={ref} className={`relative rounded-2xl overflow-hidden transition-all duration-700 hover:shadow-xl `} style={{...anim,  background: isEven ? C.white : C.offWhite, border: `1px solid ${C.border}`, transitionDelay: `${i*80}ms` }}>
       <div className="flex flex-col md:flex-row items-stretch">
         {/* Large number */}
         <div className="w-full md:w-24 flex items-center justify-center py-4 md:py-0" style={{ background: isEven ? `${C.blue}08` : `${C.emerald}08` }}>
@@ -164,9 +163,9 @@ function HvacServiceBand({ svc, i }: { svc: {name:string;description:string;imag
 }
 
 function HvacAbout({ cfg }: { cfg: Site['site_config'] }) {
-  const { ref, v } = useReveal();
+  const { ref, v, anim } = useReveal();
   return (<section id="about" className="py-28 md:py-36" style={{ background: C.white }}>
-    <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-10'}`}>
+    <div ref={ref} style={anim} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
       <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
         <div className="w-full lg:w-5/12"><div className="rounded-2xl overflow-hidden shadow-xl"><img src={cfg.about.image} alt="About" className="w-full aspect-[3/4] object-cover" /></div></div>
         <div className="w-full lg:w-7/12">
@@ -185,7 +184,7 @@ function HvacAbout({ cfg }: { cfg: Site['site_config'] }) {
 }
 
 function HvacContact({ cfg, siteId }: { cfg: Site['site_config']; siteId: string }) {
-  const { ref, v } = useReveal();
+  const { ref, v, anim } = useReveal();
   const [form, setForm] = useState({name:'',email:'',phone:'',service:'',message:'',website:''});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -197,7 +196,7 @@ function HvacContact({ cfg, siteId }: { cfg: Site['site_config']; siteId: string
   const iSty = {background:C.white,border:`1px solid ${C.border}`,color:C.text,'--tw-ring-color':C.emerald} as React.CSSProperties;
 
   return (<section id="contact" className="py-28 md:py-36" style={{ background: C.offWhite }}>
-    <div ref={ref} className={`max-w-5xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${v?'opacity-100 translate-y-0':'opacity-0 translate-y-10'}`}>
+    <div ref={ref} style={anim} className={`max-w-5xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
       {submitted ? (
         <div className="text-center py-12"><h2 className="text-4xl font-extrabold mb-4" style={{ backgroundImage: grad, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>Thank You!</h2><p style={{ color: C.textMuted }}>We&apos;ll be in touch shortly. Call <a href={`tel:${cfg.contact.phone.replace(/\D/g,'')}`} className="underline" style={{ color: C.emerald }}>{cfg.contact.phone}</a> for immediate help.</p></div>
       ) : (<>

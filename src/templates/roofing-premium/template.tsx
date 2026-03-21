@@ -38,7 +38,7 @@ function useReveal(threshold = 0.12) {
     o.observe(el);
     return () => o.disconnect();
   }, [threshold]);
-  return { ref, vis };
+  return { ref, vis, anim: { opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(20px)', transition: 'opacity 0.8s ease, transform 0.8s ease' } as React.CSSProperties };
 }
 
 export function RoofingPremiumTemplate({ site }: { site: Site }) {
@@ -210,9 +210,9 @@ export function RoofingPremiumTemplate({ site }: { site: Site }) {
 /* ═══ SUB-COMPONENTS ═══ */
 
 function StatsBar({ stats }: { stats: { value: string; label: string }[] }) {
-  const { ref, vis } = useReveal(0.3);
+  const { ref, vis, anim } = useReveal(0.3);
   return (
-    <div ref={ref} className={`py-16 transition-all duration-1000 ${vis ? 'opacity-100' : 'opacity-0'}`} style={{ background: C.navy }}>
+    <div ref={ref} className={`py-16 transition-all duration-1000 `} style={{...anim,  background: C.navy }}>
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.slice(0, 4).map((s, i) => (
@@ -228,12 +228,11 @@ function StatsBar({ stats }: { stats: { value: string; label: string }[] }) {
 }
 
 function ServiceRow({ service, index }: { service: { name: string; description: string; image?: string }; index: number }) {
-  const { ref, vis } = useReveal(0.08);
+  const { ref, vis, anim } = useReveal(0.08);
   const isEven = index % 2 === 0;
 
   return (
-    <div ref={ref} className={`flex flex-col gap-10 md:gap-20 items-center transition-all duration-1000 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'} ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}
-      style={{ transitionDelay: `${index * 80}ms` }}>
+    <div ref={ref} style={{...anim, transitionDelay: `${index * 80}ms`}} className={`flex flex-col gap-10 md:gap-20 items-center transition-all duration-1000  ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
       {/* Image */}
       <div className="w-full md:w-7/12">
         <div className="relative group overflow-hidden">
@@ -267,11 +266,11 @@ function ServiceRow({ service, index }: { service: { name: string; description: 
 }
 
 function AboutSection({ cfg, site }: { cfg: Site['site_config']; site: Site }) {
-  const { ref, vis } = useReveal();
+  const { ref, vis, anim } = useReveal();
   return (
     <section id="about" className="py-28 md:py-36" style={{ background: C.navy }}>
-      <div ref={ref} className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 transition-all duration-1000 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <div ref={ref} style={anim} className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 transition-all duration-1000 `}>
           <div className="w-full lg:w-5/12">
             <div className="relative">
               <img src={cfg.about.image} alt="About" className="w-full aspect-[3/4] object-cover" />
@@ -308,7 +307,7 @@ function AboutSection({ cfg, site }: { cfg: Site['site_config']; site: Site }) {
 }
 
 function ContactSection({ cfg, siteId }: { cfg: Site['site_config']; siteId: string }) {
-  const { ref, vis } = useReveal();
+  const { ref, vis, anim } = useReveal();
   const [form, setForm] = useState({ name: '', email: '', phone: '', service: '', message: '', website: '' });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -331,7 +330,7 @@ function ContactSection({ cfg, siteId }: { cfg: Site['site_config']; siteId: str
 
   return (
     <section id="contact" className="py-28 md:py-36" style={{ background: C.cream }}>
-      <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <div ref={ref} style={anim} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
         {submitted ? (
           <div className="text-center py-20">
             <div className="w-16 h-0.5 mx-auto mb-8" style={{ background: C.gold }} />

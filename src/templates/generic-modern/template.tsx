@@ -42,7 +42,7 @@ function useReveal(threshold = 0.12) {
     o.observe(el);
     return () => o.disconnect();
   }, [threshold]);
-  return { ref, vis };
+  return { ref, vis, anim: { opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(20px)', transition: 'opacity 0.8s ease, transform 0.8s ease' } as React.CSSProperties };
 }
 
 export function GenericModernTemplate({ site }: { site: Site }) {
@@ -241,19 +241,19 @@ export function GenericModernTemplate({ site }: { site: Site }) {
    ═══════════════════════════════════════════ */
 
 function SectionLabel({ text }: { text: string }) {
-  const { ref, vis } = useReveal();
+  const { ref, vis, anim } = useReveal();
   return (
-    <div ref={ref} className={`text-center mb-4 transition-all duration-700 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+    <div ref={ref} style={anim} className={`text-center mb-4 transition-all duration-700 `}>
       <span className="inline-block text-xs font-bold tracking-[0.2em] uppercase" style={{ color: C.accent }}>{text}</span>
     </div>
   );
 }
 
 function StatsBar({ stats }: { stats: { value: string; label: string }[] }) {
-  const { ref, vis } = useReveal(0.2);
+  const { ref, vis, anim } = useReveal(0.2);
   return (
-    <div ref={ref} className="relative z-20 -mt-20 max-w-4xl mx-auto px-6 lg:px-8">
-      <div className={`rounded-2xl overflow-hidden transition-all duration-1000 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+    <div ref={ref} style={anim} className="relative z-20 -mt-20 max-w-4xl mx-auto px-6 lg:px-8">
+      <div className={`rounded-2xl overflow-hidden transition-all duration-1000 `}
         style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', border: `1px solid ${C.border}` }}>
         <div className="grid grid-cols-2 md:grid-cols-4">
           {stats.slice(0, 4).map((s, i) => (
@@ -270,14 +270,13 @@ function StatsBar({ stats }: { stats: { value: string; label: string }[] }) {
 }
 
 function ServiceCard({ service, index }: { service: { name: string; description: string; image?: string }; index: number }) {
-  const { ref, vis } = useReveal(0.08);
+  const { ref, vis, anim } = useReveal(0.08);
   const [hovered, setHovered] = useState(false);
 
   return (
     <div
       ref={ref}
-      className={`group relative rounded-2xl overflow-hidden transition-all duration-700 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-      style={{
+      className={`group relative rounded-2xl overflow-hidden transition-all duration-700 `} style={{...anim, 
         transitionDelay: `${index * 100}ms`,
         background: hovered ? C.bgGlassHover : C.bgGlass,
         border: `1px solid ${hovered ? 'rgba(255,255,255,0.1)' : C.border}`,
@@ -317,11 +316,11 @@ function ServiceCard({ service, index }: { service: { name: string; description:
 }
 
 function AboutSection({ cfg, site }: { cfg: Site['site_config']; site: Site }) {
-  const { ref, vis } = useReveal();
+  const { ref, vis, anim } = useReveal();
   return (
     <section id="about" className="py-28 md:py-36" style={{ background: C.gray900 }}>
-      <div ref={ref} className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 transition-all duration-1000 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <div ref={ref} style={anim} className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className={`flex flex-col lg:flex-row items-center gap-16 lg:gap-24 transition-all duration-1000 `}>
           {/* Image */}
           <div className="w-full lg:w-5/12">
             <div className="relative">
@@ -377,7 +376,7 @@ function AboutSection({ cfg, site }: { cfg: Site['site_config']; site: Site }) {
 }
 
 function ContactSection({ cfg, siteId }: { cfg: Site['site_config']; siteId: string }) {
-  const { ref, vis } = useReveal();
+  const { ref, vis, anim } = useReveal();
   const [form, setForm] = useState({ name: '', email: '', phone: '', service: '', message: '', website: '' });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -401,7 +400,7 @@ function ContactSection({ cfg, siteId }: { cfg: Site['site_config']; siteId: str
 
   return (
     <section id="contact" className="py-28 md:py-36" style={{ background: C.bg }}>
-      <div ref={ref} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 ${vis ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <div ref={ref} style={anim} className={`max-w-7xl mx-auto px-6 lg:px-8 transition-all duration-1000 `}>
         {submitted ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8"
